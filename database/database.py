@@ -1,14 +1,24 @@
+import os
+from pathlib import Path
+
 from sqlalchemy import create_engine, text
+from sqlalchemy.engine import make_url
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 
-DATABASE_URL = "sqlite:///./data/predictions.db"
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./data/predictions.db")
+database_url = make_url(DATABASE_URL)
+is_sqlite = database_url.get_backend_name() == "sqlite"
 
 
-engine = create_engine(
-    DATABASE_URL,
-    connect_args={"check_same_thread": False},
-)
+if is_sqlite and database_url.database and database_url.database != ":memory:":
+    Path(database_url.database).parent.mkdir(parents=True, exist_ok=True)
+
+
+connect_args = {"check_same_thread": False} if is_sqlite else {}
+
+
+engine = create_engine(DATABASE_URL, connect_args=connect_args)
 
 SessionLocal = sessionmaker(
     autocommit=False,
