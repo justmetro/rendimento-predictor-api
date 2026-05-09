@@ -43,3 +43,4 @@ dist/
 *.db
 *.sqlite
 *.sqlite3
+data/predictions.db
