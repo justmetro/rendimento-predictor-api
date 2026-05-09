@@ -56,6 +56,46 @@ def render_feature_importance(feature_importance_data: dict) -> None:
     st.dataframe(feature_importance, use_container_width=True)
 
 
+def render_model_comparison(comparison_data: dict) -> None:
+    st.write(f"Fonte dos dados: `{comparison_data['data_source']}`")
+    st.write(f"Melhor modelo por RMSE: `{comparison_data['best_model_by_rmse']}`")
+    st.write(f"Número de linhas: `{comparison_data['n_rows']}`")
+
+    models = comparison_data["models"]
+
+    comparison_table = [
+        {
+            "modelo": model["model_name"],
+            "rmse": model["rmse"],
+            "mae": model["mae"],
+            "r2": model["r2"],
+            "cv_r2_mean": model["cv_r2_mean"],
+            "cv_r2_std": model["cv_r2_std"],
+        }
+        for model in models
+    ]
+
+    st.dataframe(comparison_table, use_container_width=True)
+
+    st.subheader("RMSE por modelo")
+
+    st.bar_chart(
+        {
+            model["model_name"]: model["rmse"]
+            for model in models
+        }
+    )
+
+    st.subheader("R² por modelo")
+
+    st.bar_chart(
+        {
+            model["model_name"]: model["r2"]
+            for model in models
+        }
+    )
+
+
 st.title("📊 Rendimento Predictor API")
 
 st.write(
@@ -80,6 +120,7 @@ with st.sidebar:
     st.markdown("- `/features`")
     st.markdown("- `/model-info`")
     st.markdown("- `/model-info/real`")
+    st.markdown("- `/model-comparison`")
     st.markdown("- `/feature-importance`")
     st.markdown("- `/feature-importance/real`")
     st.markdown("- `/predict`")
@@ -90,10 +131,11 @@ with st.sidebar:
     )
 
 
-tab_predict, tab_models, tab_about = st.tabs(
+tab_predict, tab_models, tab_comparison, tab_about = st.tabs(
     [
         "Predição",
         "Modelos",
+        "Comparação",
         "Sobre",
     ]
 )
@@ -244,6 +286,32 @@ with tab_models:
                 st.exception(error)
 
 
+with tab_comparison:
+    st.subheader("Comparação de modelos")
+
+    st.write(
+        """
+        Esta seção compara diferentes modelos treinados sobre o dataset padronizado
+        do pipeline real:
+
+        - Regressão Linear
+        - Random Forest
+        - XGBoost
+
+        A escolha do melhor modelo é feita pelo menor RMSE.
+        """
+    )
+
+    if st.button("Carregar comparação de modelos"):
+        try:
+            comparison = load_json("/model-comparison")
+            render_model_comparison(comparison)
+
+        except requests.exceptions.RequestException as error:
+            st.error("Erro ao carregar comparação de modelos.")
+            st.exception(error)
+
+
 with tab_about:
     st.subheader("Sobre o projeto")
 
@@ -255,6 +323,7 @@ with tab_about:
         - geração e preparação de dados;
         - análise exploratória;
         - treinamento de modelo;
+        - comparação entre modelos;
         - API com FastAPI;
         - testes automatizados;
         - CI/CD com GitHub Actions;
