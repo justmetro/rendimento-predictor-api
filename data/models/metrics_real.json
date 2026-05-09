@@ -1,0 +1,17 @@
+{
+    "model_name": "random_forest_real_v1",
+    "data_source": "pnad_real_processed",
+    "rmse": 6.42,
+    "mae": 4.99,
+    "r2": 0.861,
+    "n_rows": 1000,
+    "features": [
+        "idade",
+        "sexo",
+        "cor_raca",
+        "anos_estudo",
+        "setor",
+        "regiao"
+    ],
+    "target": "rendimento_hora"
+}
