@@ -1,5 +1,7 @@
 from fastapi import APIRouter
 
+from api.schemas import PredictionInput, PredictionOutput
+
 router = APIRouter()
 
 
@@ -25,12 +27,53 @@ def health_check():
 def get_features():
     return {
         "target": "rendimento_hora",
-        "features": [
-            "idade",
-            "sexo",
-            "cor_raca",
-            "anos_estudo",
-            "setor",
-            "regiao"
-        ]
+        "features": {
+            "idade": {
+                "type": "int",
+                "min": 18,
+                "max": 80
+            },
+            "sexo": {
+                "type": "category",
+                "values": ["M", "F"]
+            },
+            "cor_raca": {
+                "type": "category",
+                "values": ["Branca", "Preta", "Parda", "Amarela", "Indigena"]
+            },
+            "anos_estudo": {
+                "type": "int",
+                "min": 0,
+                "max": 20
+            },
+            "setor": {
+                "type": "category",
+                "values": ["Servicos", "Industria", "Comercio", "Agricultura", "Construcao"]
+            },
+            "regiao": {
+                "type": "category",
+                "values": ["Norte", "Nordeste", "Centro-Oeste", "Sudeste", "Sul"]
+            }
+        }
+    }
+
+
+@router.post("/predict", response_model=PredictionOutput)
+def predict(data: PredictionInput):
+    rendimento_base = 10.0
+
+    rendimento_previsto = (
+        rendimento_base
+        + data.idade * 0.15
+        + data.anos_estudo * 2.5
+    )
+
+    return {
+        "rendimento_hora_previsto": round(rendimento_previsto, 2),
+        "intervalo_confianca": {
+            "min": round(rendimento_previsto * 0.85, 2),
+            "max": round(rendimento_previsto * 1.15, 2)
+        },
+        "features_usadas": data.model_dump(),
+        "modelo": "baseline_temporario"
     }
