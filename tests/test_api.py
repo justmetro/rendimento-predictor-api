@@ -64,6 +64,26 @@ def test_real_model_info_endpoint():
     assert data["target"] == "rendimento_hora"
 
 
+def test_model_comparison_endpoint():
+    response = client.get("/model-comparison")
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["data_source"] == "pnad_real_processed"
+    assert data["target"] == "rendimento_hora"
+    assert "models" in data
+    assert len(data["models"]) >= 3
+    assert "best_model_by_rmse" in data
+
+    model_names = [model["model_name"] for model in data["models"]]
+
+    assert "linear_regression" in model_names
+    assert "random_forest" in model_names
+    assert "xgboost" in model_names
+
+
 def test_feature_importance_endpoint():
     response = client.get("/feature-importance")
 
