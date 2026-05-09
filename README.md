@@ -2,9 +2,17 @@
 
 API REST desenvolvida com FastAPI para predizer rendimento por hora com base em características sociodemográficas e profissionais.
 
-Este projeto combina Machine Learning, backend, testes automatizados, EDA, visualização de dados, Docker, CI/CD e deploy, simulando um fluxo completo de desenvolvimento de uma API preditiva.
+Este projeto combina Machine Learning, backend, testes automatizados, EDA, visualização de dados, Docker, CI/CD, deploy de API e frontend, simulando um fluxo completo de desenvolvimento de uma aplicação preditiva.
 
-## Deploy
+## Aplicação Web
+
+Frontend publicado no Streamlit Cloud:
+
+```txt
+https://rendimento-predictor-api.streamlit.app/
+```
+
+## Deploy da API
 
 A API está disponível publicamente em:
 
@@ -32,12 +40,13 @@ https://rendimento-predictor-api.onrender.com/model-info
 
 ## Objetivo
 
-Construir uma API capaz de receber dados como idade, sexo, cor/raça, anos de estudo, setor e região, e retornar uma estimativa de rendimento por hora.
+Construir uma aplicação capaz de receber dados como idade, sexo, cor/raça, anos de estudo, setor e região, e retornar uma estimativa de rendimento por hora.
 
 ## Tecnologias utilizadas
 
 - Python
 - FastAPI
+- Streamlit
 - Scikit-learn
 - Pandas
 - NumPy
@@ -47,6 +56,7 @@ Construir uma API capaz de receber dados como idade, sexo, cor/raça, anos de es
 - GitHub Actions
 - Docker
 - Render
+- Streamlit Cloud
 
 ## Endpoints
 
@@ -119,7 +129,7 @@ Exemplo de saída:
 O modelo atual é um baseline treinado com dados sintéticos, usado para validar o fluxo completo:
 
 ```txt
-dados → EDA → treino → modelo salvo → API → predição → testes → CI/CD → deploy
+dados → EDA → treino → modelo salvo → API → frontend → testes → CI/CD → deploy
 ```
 
 Métricas atuais:
@@ -240,6 +250,26 @@ Acesse a documentação automática:
 http://127.0.0.1:8000/docs
 ```
 
+## Como rodar o frontend localmente
+
+Rode:
+
+```bash
+streamlit run frontend/app_streamlit.py
+```
+
+Ou:
+
+```bash
+python -m streamlit run frontend/app_streamlit.py
+```
+
+Acesse:
+
+```txt
+http://localhost:8501
+```
+
 ## Como rodar com Docker
 
 Construa a imagem:
@@ -278,6 +308,11 @@ pytest --cov=.
 
 O projeto usa GitHub Actions para rodar os testes automaticamente a cada push na branch `main`.
 
+## Deploy
+
+- Backend/API: Render
+- Frontend: Streamlit Cloud
+
 ## Próximos passos
 
 - Substituir dados sintéticos por dados públicos reais do IBGE/PNAD
@@ -285,4 +320,4 @@ O projeto usa GitHub Actions para rodar os testes automaticamente a cada push na
 - Melhorar feature engineering
 - Comparar modelos: Regressão Linear, Random Forest e XGBoost
 - Adicionar banco de dados para salvar predições
-- Criar frontend simples para consumir a API
+- Melhorar a interface web
