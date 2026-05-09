@@ -32,10 +32,16 @@ Health check:
 https://rendimento-predictor-api.onrender.com/health
 ```
 
-Informações do modelo:
+Informações do modelo em produção:
 
 ```txt
 https://rendimento-predictor-api.onrender.com/model-info
+```
+
+Informações do modelo candidato do pipeline real:
+
+```txt
+https://rendimento-predictor-api.onrender.com/model-info/real
 ```
 
 ## Objetivo
@@ -76,13 +82,23 @@ GET /features
 
 Retorna as variáveis aceitas pelo modelo.
 
-### Informações do modelo
+### Informações do modelo em produção
 
 ```http
 GET /model-info
 ```
 
-Retorna métricas e informações do modelo treinado.
+Retorna métricas e informações do modelo atualmente usado no endpoint `/predict`.
+
+### Informações do modelo candidato
+
+```http
+GET /model-info/real
+```
+
+Retorna métricas e informações do modelo treinado pelo pipeline de dados reais padronizados.
+
+Atualmente, esse modelo candidato ainda utiliza um arquivo no formato real padronizado para validar o pipeline. A próxima etapa é substituir esse arquivo por dados reais de fato da PNAD/IBGE.
 
 ### Predição
 
@@ -126,18 +142,53 @@ Exemplo de saída:
 
 ## Modelo atual
 
-O modelo atual é um baseline treinado com dados sintéticos, usado para validar o fluxo completo:
+O modelo atual em produção é um baseline treinado com dados sintéticos, usado para validar o fluxo completo:
 
 ```txt
 dados → EDA → treino → modelo salvo → API → frontend → testes → CI/CD → deploy
 ```
 
-Métricas atuais:
+Métricas atuais do modelo em produção:
 
 ```txt
 RMSE: 6.42
 MAE: 4.99
 R²: 0.861
+```
+
+## Pipeline de dados reais
+
+A partir da versão 1.1, o projeto também possui um pipeline separado para dados reais padronizados.
+
+Arquivos principais:
+
+```txt
+scripts/prepare_real_data.py
+scripts/eda_real.py
+ml/train_real.py
+```
+
+Esse pipeline lê um CSV em:
+
+```txt
+data/raw/pnad_real.csv
+```
+
+E gera:
+
+```txt
+data/processed/pnad_real_processed.csv
+data/processed/real_eda_summary.txt
+data/processed/real_plots/
+data/models/rendimento_model_real.pkl
+data/models/metrics_real.json
+```
+
+O objetivo é separar claramente:
+
+```txt
+modelo em produção → usado pela API em /predict
+modelo candidato → treinado pelo pipeline real e exposto em /model-info/real
 ```
 
 ## Dados sintéticos e EDA
@@ -232,10 +283,28 @@ Gere a EDA inicial:
 python -m scripts.eda_synthetic
 ```
 
-Treine o modelo:
+Treine o modelo sintético:
 
 ```bash
 python ml/train.py
+```
+
+Prepare os dados reais padronizados:
+
+```bash
+python -m scripts.prepare_real_data
+```
+
+Gere a EDA dos dados reais padronizados:
+
+```bash
+python -m scripts.eda_real
+```
+
+Treine o modelo candidato do pipeline real:
+
+```bash
+python -m ml.train_real
 ```
 
 Rode a API:
@@ -315,9 +384,10 @@ O projeto usa GitHub Actions para rodar os testes automaticamente a cada push na
 
 ## Próximos passos
 
-- Substituir dados sintéticos por dados públicos reais do IBGE/PNAD
-- Adicionar análise exploratória dos dados reais
+- Substituir o arquivo padronizado de exemplo por dados públicos reais do IBGE/PNAD
+- Adicionar análise exploratória dos dados reais completos
 - Melhorar feature engineering
 - Comparar modelos: Regressão Linear, Random Forest e XGBoost
+- Promover o melhor modelo candidato para produção
 - Adicionar banco de dados para salvar predições
 - Melhorar a interface web
