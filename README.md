@@ -20,6 +20,7 @@ A interface permite:
 - visualizar métricas dos modelos;
 - visualizar importância das variáveis;
 - comparar Regressão Linear, Random Forest e XGBoost;
+- visualizar histórico de predições;
 - visualizar informações gerais do projeto.
 
 ## Deploy da API
@@ -70,6 +71,12 @@ Importância das variáveis do modelo candidato:
 
 ```txt
 https://rendimento-predictor-api.onrender.com/feature-importance/real
+```
+
+Histórico de predições:
+
+```txt
+https://rendimento-predictor-api.onrender.com/history
 ```
 
 ## Objetivo
@@ -198,6 +205,56 @@ Exemplo de saída:
   "modelo": "random_forest_sintetico_v1"
 }
 ```
+
+### Histórico de predições
+
+```http
+GET /history
+```
+
+Retorna as últimas predições salvas no banco SQLite. O endpoint aceita o parâmetro opcional `limit`, com valor padrão `10`.
+
+Exemplo:
+
+```http
+GET /history?limit=10
+```
+
+Exemplo de saída:
+
+```json
+{
+  "total_returned": 1,
+  "predictions": [
+    {
+      "id": 1,
+      "idade": 35,
+      "sexo": "M",
+      "cor_raca": "Branca",
+      "anos_estudo": 12,
+      "setor": "Servicos",
+      "regiao": "Sudeste",
+      "rendimento_hora_previsto": 50.48,
+      "intervalo_confianca": {
+        "min": 42.9,
+        "max": 58.05
+      },
+      "modelo": "random_forest_sintetico_v1",
+      "created_at": "2026-05-09T12:00:00"
+    }
+  ]
+}
+```
+
+## Banco de dados e histórico
+
+O projeto usa SQLite local para registrar as predições realizadas pela API.
+
+- Arquivo local do banco: `data/predictions.db`
+- Esse arquivo é ignorado pelo Git.
+- Cada chamada para `POST /predict` salva uma nova predição.
+- O endpoint `GET /history` consulta as últimas predições salvas.
+- Não há Alembic nesta etapa; a tabela é criada automaticamente ao iniciar a API ou manualmente com `python -m database.init_db`.
 
 ## Modelo atual
 
@@ -427,6 +484,14 @@ Compare os modelos:
 python -m ml.compare_models
 ```
 
+Inicialize o banco SQLite, se quiser criar a tabela manualmente:
+
+```bash
+python -m database.init_db
+```
+
+O banco também é criado automaticamente ao iniciar a API.
+
 Rode a API:
 
 ```bash
@@ -457,6 +522,18 @@ Acesse:
 
 ```txt
 http://localhost:8501
+```
+
+Por padrão, o frontend local usa a API em:
+
+```txt
+http://localhost:8000
+```
+
+Em produção, configure a URL da API por variável de ambiente ou secret do Streamlit Cloud:
+
+```txt
+API_URL = "https://rendimento-predictor-api.onrender.com"
 ```
 
 ## Como rodar com Docker
@@ -501,6 +578,13 @@ O projeto usa GitHub Actions para rodar os testes automaticamente a cada push na
 
 - Backend/API: Render
 - Frontend: Streamlit Cloud
+
+No Streamlit Cloud, configure os secrets para apontar o frontend para a API publicada no Render:
+
+```toml
+API_URL = "https://rendimento-predictor-api.onrender.com"
+APP_ENV = "production"
+```
 
 ## Próximos passos
 
