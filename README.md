@@ -12,6 +12,13 @@ Frontend publicado no Streamlit Cloud:
 https://rendimento-predictor-api.streamlit.app/
 ```
 
+A interface permite:
+
+- preencher dados para predição;
+- consultar o modelo em produção;
+- consultar o modelo candidato do pipeline real;
+- visualizar informações gerais do projeto.
+
 ## Deploy da API
 
 A API está disponível publicamente em:
