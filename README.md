@@ -2,7 +2,33 @@
 
 API REST desenvolvida com FastAPI para predizer rendimento por hora com base em características sociodemográficas e profissionais.
 
-Este projeto combina Machine Learning, backend, testes automatizados, EDA, visualização de dados e CI/CD, simulando um fluxo completo de desenvolvimento de uma API preditiva.
+Este projeto combina Machine Learning, backend, testes automatizados, EDA, visualização de dados, Docker, CI/CD e deploy, simulando um fluxo completo de desenvolvimento de uma API preditiva.
+
+## Deploy
+
+A API está disponível publicamente em:
+
+```txt
+https://rendimento-predictor-api.onrender.com/
+```
+
+Documentação interativa Swagger:
+
+```txt
+https://rendimento-predictor-api.onrender.com/docs
+```
+
+Health check:
+
+```txt
+https://rendimento-predictor-api.onrender.com/health
+```
+
+Informações do modelo:
+
+```txt
+https://rendimento-predictor-api.onrender.com/model-info
+```
 
 ## Objetivo
 
@@ -19,6 +45,8 @@ Construir uma API capaz de receber dados como idade, sexo, cor/raça, anos de es
 - Joblib
 - Pytest
 - GitHub Actions
+- Docker
+- Render
 
 ## Endpoints
 
@@ -91,7 +119,7 @@ Exemplo de saída:
 O modelo atual é um baseline treinado com dados sintéticos, usado para validar o fluxo completo:
 
 ```txt
-dados → EDA → treino → modelo salvo → API → predição → testes → CI/CD
+dados → EDA → treino → modelo salvo → API → predição → testes → CI/CD → deploy
 ```
 
 Métricas atuais:
@@ -212,6 +240,26 @@ Acesse a documentação automática:
 http://127.0.0.1:8000/docs
 ```
 
+## Como rodar com Docker
+
+Construa a imagem:
+
+```bash
+docker build -t rendimento-predictor-api .
+```
+
+Rode o container:
+
+```bash
+docker run -p 8000:8000 rendimento-predictor-api
+```
+
+Acesse:
+
+```txt
+http://127.0.0.1:8000/docs
+```
+
 ## Testes
 
 Para rodar os testes:
@@ -237,4 +285,4 @@ O projeto usa GitHub Actions para rodar os testes automaticamente a cada push na
 - Melhorar feature engineering
 - Comparar modelos: Regressão Linear, Random Forest e XGBoost
 - Adicionar banco de dados para salvar predições
-- Fazer deploy da API
+- Criar frontend simples para consumir a API
