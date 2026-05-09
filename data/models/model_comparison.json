@@ -1,0 +1,40 @@
+{
+    "data_source": "pnad_real_processed",
+    "n_rows": 1000,
+    "target": "rendimento_hora",
+    "features": [
+        "idade",
+        "sexo",
+        "cor_raca",
+        "anos_estudo",
+        "setor",
+        "regiao"
+    ],
+    "models": [
+        {
+            "model_name": "linear_regression",
+            "rmse": 5.76,
+            "mae": 4.57,
+            "r2": 0.888,
+            "cv_r2_mean": 0.884,
+            "cv_r2_std": 0.023
+        },
+        {
+            "model_name": "random_forest",
+            "rmse": 6.42,
+            "mae": 4.99,
+            "r2": 0.861,
+            "cv_r2_mean": 0.863,
+            "cv_r2_std": 0.016
+        },
+        {
+            "model_name": "xgboost",
+            "rmse": 6.51,
+            "mae": 5.14,
+            "r2": 0.857,
+            "cv_r2_mean": 0.848,
+            "cv_r2_std": 0.022
+        }
+    ],
+    "best_model_by_rmse": "linear_regression"
+}
