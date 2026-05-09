@@ -19,6 +19,7 @@ A interface permite:
 - consultar o modelo candidato do pipeline real;
 - visualizar métricas dos modelos;
 - visualizar importância das variáveis;
+- comparar Regressão Linear, Random Forest e XGBoost;
 - visualizar informações gerais do projeto.
 
 ## Deploy da API
@@ -53,6 +54,12 @@ Informações do modelo candidato do pipeline real:
 https://rendimento-predictor-api.onrender.com/model-info/real
 ```
 
+Comparação de modelos:
+
+```txt
+https://rendimento-predictor-api.onrender.com/model-comparison
+```
+
 Importância das variáveis do modelo em produção:
 
 ```txt
@@ -75,6 +82,7 @@ Construir uma aplicação capaz de receber dados como idade, sexo, cor/raça, an
 - FastAPI
 - Streamlit
 - Scikit-learn
+- XGBoost
 - Pandas
 - NumPy
 - Matplotlib
@@ -120,6 +128,20 @@ GET /model-info/real
 Retorna métricas e informações do modelo treinado pelo pipeline de dados reais padronizados.
 
 Atualmente, esse modelo candidato ainda utiliza um arquivo no formato real padronizado para validar o pipeline. A próxima etapa é substituir esse arquivo por dados reais de fato da PNAD/IBGE.
+
+### Comparação de modelos
+
+```http
+GET /model-comparison
+```
+
+Retorna a comparação entre os modelos treinados no pipeline:
+
+- Regressão Linear
+- Random Forest
+- XGBoost
+
+A comparação inclui RMSE, MAE, R², média de R² em validação cruzada e desvio padrão da validação cruzada.
 
 ### Importância das variáveis do modelo em produção
 
@@ -182,7 +204,7 @@ Exemplo de saída:
 O modelo atual em produção é um baseline treinado com dados sintéticos, usado para validar o fluxo completo:
 
 ```txt
-dados → EDA → treino → modelo salvo → API → frontend → testes → CI/CD → deploy
+dados → EDA → treino → comparação de modelos → modelo salvo → API → frontend → testes → CI/CD → deploy
 ```
 
 Métricas atuais do modelo em produção:
@@ -191,6 +213,40 @@ Métricas atuais do modelo em produção:
 RMSE: 6.42
 MAE: 4.99
 R²: 0.861
+```
+
+## Comparação de modelos
+
+O projeto compara três abordagens de modelagem:
+
+```txt
+Regressão Linear
+Random Forest
+XGBoost
+```
+
+Resultado atual da comparação:
+
+```txt
+Melhor modelo por RMSE: linear_regression
+
+linear_regression → RMSE 5.76 | MAE 4.57 | R² 0.888
+random_forest     → RMSE 6.42 | MAE 4.99 | R² 0.861
+xgboost           → RMSE 6.51 | MAE 5.14 | R² 0.857
+```
+
+Como o dataset atual ainda é sintético e foi gerado com uma relação aproximadamente linear, a Regressão Linear apresenta melhor desempenho nesta etapa.
+
+A comparação é gerada por:
+
+```bash
+python -m ml.compare_models
+```
+
+E salva em:
+
+```txt
+data/models/model_comparison.json
 ```
 
 ## Pipeline de dados reais
@@ -203,6 +259,7 @@ Arquivos principais:
 scripts/prepare_real_data.py
 scripts/eda_real.py
 ml/train_real.py
+ml/compare_models.py
 ```
 
 Esse pipeline lê um CSV em:
@@ -219,6 +276,7 @@ data/processed/real_eda_summary.txt
 data/processed/real_plots/
 data/models/rendimento_model_real.pkl
 data/models/metrics_real.json
+data/models/model_comparison.json
 ```
 
 O objetivo é separar claramente:
@@ -226,6 +284,7 @@ O objetivo é separar claramente:
 ```txt
 modelo em produção → usado pela API em /predict
 modelo candidato → treinado pelo pipeline real e exposto em /model-info/real
+comparação → modelos avaliados e expostos em /model-comparison
 ```
 
 ## Importância das variáveis
@@ -362,6 +421,12 @@ Treine o modelo candidato do pipeline real:
 python -m ml.train_real
 ```
 
+Compare os modelos:
+
+```bash
+python -m ml.compare_models
+```
+
 Rode a API:
 
 ```bash
@@ -442,7 +507,6 @@ O projeto usa GitHub Actions para rodar os testes automaticamente a cada push na
 - Substituir o arquivo padronizado de exemplo por dados públicos reais do IBGE/PNAD
 - Adicionar análise exploratória dos dados reais completos
 - Melhorar feature engineering
-- Comparar modelos: Regressão Linear, Random Forest e XGBoost
 - Promover o melhor modelo candidato para produção
 - Adicionar banco de dados para salvar predições
 - Melhorar a interface web
