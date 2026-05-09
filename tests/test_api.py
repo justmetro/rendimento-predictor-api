@@ -18,6 +18,7 @@ def test_health_endpoint():
     assert response.status_code == 200
     assert response.json()["status"] == "ok"
     assert response.json()["model_loaded"] is True
+    assert response.json()["database_connected"] is True
 
 
 def test_features_endpoint():
@@ -134,6 +135,45 @@ def test_predict_valid_input():
     assert "intervalo_confianca" in data
     assert "features_usadas" in data
     assert data["modelo"] == "random_forest_sintetico_v1"
+
+
+def test_history_endpoint():
+    payload = {
+        "idade": 35,
+        "sexo": "M",
+        "cor_raca": "Branca",
+        "anos_estudo": 12,
+        "setor": "Servicos",
+        "regiao": "Sudeste"
+    }
+
+    prediction_response = client.post("/predict", json=payload)
+    assert prediction_response.status_code == 200
+
+    response = client.get("/history?limit=1")
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["total_returned"] == 1
+    assert len(data["predictions"]) == 1
+
+    prediction = data["predictions"][0]
+
+    assert "id" in prediction
+    assert prediction["idade"] == payload["idade"]
+    assert prediction["sexo"] == payload["sexo"]
+    assert prediction["cor_raca"] == payload["cor_raca"]
+    assert prediction["anos_estudo"] == payload["anos_estudo"]
+    assert prediction["setor"] == payload["setor"]
+    assert prediction["regiao"] == payload["regiao"]
+    assert "rendimento_hora_previsto" in prediction
+    assert "intervalo_confianca" in prediction
+    assert "min" in prediction["intervalo_confianca"]
+    assert "max" in prediction["intervalo_confianca"]
+    assert prediction["modelo"] == "random_forest_sintetico_v1"
+    assert "created_at" in prediction
 
 
 def test_predict_invalid_age():
