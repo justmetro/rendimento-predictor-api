@@ -17,6 +17,8 @@ A interface permite:
 - preencher dados para predição;
 - consultar o modelo em produção;
 - consultar o modelo candidato do pipeline real;
+- visualizar métricas dos modelos;
+- visualizar importância das variáveis;
 - visualizar informações gerais do projeto.
 
 ## Deploy da API
@@ -49,6 +51,18 @@ Informações do modelo candidato do pipeline real:
 
 ```txt
 https://rendimento-predictor-api.onrender.com/model-info/real
+```
+
+Importância das variáveis do modelo em produção:
+
+```txt
+https://rendimento-predictor-api.onrender.com/feature-importance
+```
+
+Importância das variáveis do modelo candidato:
+
+```txt
+https://rendimento-predictor-api.onrender.com/feature-importance/real
 ```
 
 ## Objetivo
@@ -106,6 +120,22 @@ GET /model-info/real
 Retorna métricas e informações do modelo treinado pelo pipeline de dados reais padronizados.
 
 Atualmente, esse modelo candidato ainda utiliza um arquivo no formato real padronizado para validar o pipeline. A próxima etapa é substituir esse arquivo por dados reais de fato da PNAD/IBGE.
+
+### Importância das variáveis do modelo em produção
+
+```http
+GET /feature-importance
+```
+
+Retorna as variáveis mais importantes para o modelo atualmente usado pela API.
+
+### Importância das variáveis do modelo candidato
+
+```http
+GET /feature-importance/real
+```
+
+Retorna as variáveis mais importantes para o modelo candidato treinado pelo pipeline real.
 
 ### Predição
 
@@ -197,6 +227,24 @@ O objetivo é separar claramente:
 modelo em produção → usado pela API em /predict
 modelo candidato → treinado pelo pipeline real e exposto em /model-info/real
 ```
+
+## Importância das variáveis
+
+O projeto expõe a importância das variáveis dos modelos Random Forest.
+
+Para o modelo em produção:
+
+```bash
+GET /feature-importance
+```
+
+Para o modelo candidato:
+
+```bash
+GET /feature-importance/real
+```
+
+Esses endpoints ajudam a entender quais variáveis mais influenciam a predição, como idade, anos de estudo, região, setor, sexo e cor/raça.
 
 ## Dados sintéticos e EDA
 
