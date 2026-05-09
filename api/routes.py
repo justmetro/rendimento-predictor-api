@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from api.schemas import PredictionInput, PredictionOutput
 from ml.predict import predict_rendimento
+from ml.model_info import load_model_metrics
 
 router = APIRouter()
 
@@ -57,6 +58,10 @@ def get_features():
             }
         }
     }
+
+@router.get("/model-info")
+def get_model_info():
+    return load_model_metrics()
 
 
 @router.post("/predict", response_model=PredictionOutput)

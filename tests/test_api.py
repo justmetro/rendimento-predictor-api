@@ -97,3 +97,17 @@ def test_predict_missing_field():
     response = client.post("/predict", json=payload)
 
     assert response.status_code == 422
+
+    def test_model_info_endpoint():
+        response = client.get("/model-info")
+
+        assert response.status_code == 200
+
+        data = response.json()
+
+        assert data["model_name"] == "random_forest_sintetico_v1"
+        assert "rmse" in data
+        assert "mae" in data
+        assert "r2" in data
+        assert "features" in data
+        assert data["target"] == "rendimento_hora"
