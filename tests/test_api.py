@@ -17,7 +17,7 @@ def test_health_endpoint():
 
     assert response.status_code == 200
     assert response.json()["status"] == "ok"
-    assert response.json()["model_loaded"] is False
+    assert response.json()["model_loaded"] is True
 
 
 def test_features_endpoint():
@@ -31,6 +31,37 @@ def test_features_endpoint():
     assert "features" in data
     assert "idade" in data["features"]
     assert "sexo" in data["features"]
+
+
+def test_model_info_endpoint():
+    response = client.get("/model-info")
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["model_name"] == "random_forest_sintetico_v1"
+    assert "rmse" in data
+    assert "mae" in data
+    assert "r2" in data
+    assert "features" in data
+    assert data["target"] == "rendimento_hora"
+
+
+def test_real_model_info_endpoint():
+    response = client.get("/model-info/real")
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["model_name"] == "random_forest_real_v1"
+    assert data["data_source"] == "pnad_real_processed"
+    assert "rmse" in data
+    assert "mae" in data
+    assert "r2" in data
+    assert "features" in data
+    assert data["target"] == "rendimento_hora"
 
 
 def test_predict_valid_input():
@@ -97,17 +128,3 @@ def test_predict_missing_field():
     response = client.post("/predict", json=payload)
 
     assert response.status_code == 422
-
-    def test_model_info_endpoint():
-        response = client.get("/model-info")
-
-        assert response.status_code == 200
-
-        data = response.json()
-
-        assert data["model_name"] == "random_forest_sintetico_v1"
-        assert "rmse" in data
-        assert "mae" in data
-        assert "r2" in data
-        assert "features" in data
-        assert data["target"] == "rendimento_hora"
