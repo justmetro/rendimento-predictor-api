@@ -12,16 +12,34 @@ def get_api_url() -> str:
     env_api_url = os.getenv("API_URL")
     app_env = os.getenv("APP_ENV") or os.getenv("ENVIRONMENT")
 
+    try:
+        secrets_api_url = st.secrets.get("API_URL")
+        secrets_app_env = st.secrets.get("APP_ENV") or st.secrets.get("ENVIRONMENT")
+    except Exception:
+        secrets_api_url = None
+        secrets_app_env = None
+
     if env_api_url:
         return env_api_url.rstrip("/")
 
+    if secrets_api_url:
+        return str(secrets_api_url).rstrip("/")
+
     if app_env and app_env.lower() in {"production", "prod"}:
-        return PRODUCTION_API_URL
+        return PRODUCTION_API_URL.rstrip("/")
 
-    if os.getenv("RENDER") or os.getenv("STREAMLIT_SHARING_MODE"):
-        return PRODUCTION_API_URL
+    if secrets_app_env and str(secrets_app_env).lower() in {"production", "prod"}:
+        return PRODUCTION_API_URL.rstrip("/")
 
-    return LOCAL_API_URL
+    if (
+        os.getenv("RENDER")
+        or os.getenv("STREAMLIT_SHARING_MODE")
+        or os.getenv("STREAMLIT_SERVER_HEADLESS")
+        or os.getenv("STREAMLIT_RUNTIME")
+    ):
+        return PRODUCTION_API_URL.rstrip("/")
+
+    return LOCAL_API_URL.rstrip("/")
 
 
 st.set_page_config(
