@@ -1,8 +1,27 @@
+import os
+
 import requests
 import streamlit as st
 
 
-API_URL = "https://rendimento-predictor-api.onrender.com"
+PRODUCTION_API_URL = "https://rendimento-predictor-api.onrender.com"
+LOCAL_API_URL = "http://localhost:8000"
+
+
+def get_api_url() -> str:
+    env_api_url = os.getenv("API_URL")
+    app_env = os.getenv("APP_ENV") or os.getenv("ENVIRONMENT")
+
+    if env_api_url:
+        return env_api_url.rstrip("/")
+
+    if app_env and app_env.lower() in {"production", "prod"}:
+        return PRODUCTION_API_URL
+
+    if os.getenv("RENDER") or os.getenv("STREAMLIT_SHARING_MODE"):
+        return PRODUCTION_API_URL
+
+    return LOCAL_API_URL
 
 
 st.set_page_config(
@@ -10,6 +29,9 @@ st.set_page_config(
     page_icon="📊",
     layout="centered",
 )
+
+
+API_URL = get_api_url()
 
 
 def load_json(endpoint: str) -> dict:
