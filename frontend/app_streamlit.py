@@ -12,6 +12,50 @@ st.set_page_config(
 )
 
 
+def load_json(endpoint: str) -> dict:
+    response = requests.get(
+        f"{API_URL}{endpoint}",
+        timeout=30,
+    )
+    response.raise_for_status()
+    return response.json()
+
+
+def render_model_metrics(model_info: dict) -> None:
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.metric("RMSE", model_info["rmse"])
+
+    with col2:
+        st.metric("MAE", model_info["mae"])
+
+    with col3:
+        st.metric("R²", model_info["r2"])
+
+    st.json(model_info)
+
+
+def render_feature_importance(feature_importance_data: dict) -> None:
+    st.write(f"Modelo: `{feature_importance_data['model_name']}`")
+    st.write(f"Tipo: `{feature_importance_data['model_type']}`")
+
+    feature_importance = feature_importance_data["feature_importance"]
+
+    if not feature_importance:
+        st.warning("Nenhuma importância de variável encontrada.")
+        return
+
+    st.bar_chart(
+        {
+            item["feature"]: item["importance"]
+            for item in feature_importance
+        }
+    )
+
+    st.dataframe(feature_importance, use_container_width=True)
+
+
 st.title("📊 Rendimento Predictor API")
 
 st.write(
@@ -36,6 +80,8 @@ with st.sidebar:
     st.markdown("- `/features`")
     st.markdown("- `/model-info`")
     st.markdown("- `/model-info/real`")
+    st.markdown("- `/feature-importance`")
+    st.markdown("- `/feature-importance/real`")
     st.markdown("- `/predict`")
 
     st.warning(
@@ -146,7 +192,7 @@ with tab_predict:
 
 
 with tab_models:
-    st.subheader("Métricas dos modelos")
+    st.subheader("Métricas e importância das variáveis")
 
     st.write(
         """
@@ -155,54 +201,46 @@ with tab_models:
         """
     )
 
-    col_prod, col_candidate = st.columns(2)
+    model_option = st.radio(
+        "Escolha o modelo",
+        options=[
+            "Modelo em produção",
+            "Modelo candidato",
+        ],
+        horizontal=True,
+    )
 
-    with col_prod:
-        st.markdown("### Modelo em produção")
+    if model_option == "Modelo em produção":
+        model_info_endpoint = "/model-info"
+        feature_importance_endpoint = "/feature-importance"
+    else:
+        model_info_endpoint = "/model-info/real"
+        feature_importance_endpoint = "/feature-importance/real"
 
-        if st.button("Carregar modelo em produção"):
+    col_metrics, col_importance = st.columns(2)
+
+    with col_metrics:
+        st.markdown("### Métricas")
+
+        if st.button("Carregar métricas"):
             try:
-                response = requests.get(
-                    f"{API_URL}/model-info",
-                    timeout=30,
-                )
-
-                response.raise_for_status()
-
-                model_info = response.json()
-
-                st.metric("RMSE", model_info["rmse"])
-                st.metric("MAE", model_info["mae"])
-                st.metric("R²", model_info["r2"])
-
-                st.json(model_info)
+                model_info = load_json(model_info_endpoint)
+                render_model_metrics(model_info)
 
             except requests.exceptions.RequestException as error:
-                st.error("Erro ao carregar informações do modelo em produção.")
+                st.error("Erro ao carregar métricas do modelo.")
                 st.exception(error)
 
-    with col_candidate:
-        st.markdown("### Modelo candidato")
+    with col_importance:
+        st.markdown("### Feature importance")
 
-        if st.button("Carregar modelo candidato"):
+        if st.button("Carregar importância das variáveis"):
             try:
-                response = requests.get(
-                    f"{API_URL}/model-info/real",
-                    timeout=30,
-                )
-
-                response.raise_for_status()
-
-                model_info = response.json()
-
-                st.metric("RMSE", model_info["rmse"])
-                st.metric("MAE", model_info["mae"])
-                st.metric("R²", model_info["r2"])
-
-                st.json(model_info)
+                feature_importance = load_json(feature_importance_endpoint)
+                render_feature_importance(feature_importance)
 
             except requests.exceptions.RequestException as error:
-                st.error("Erro ao carregar informações do modelo candidato.")
+                st.error("Erro ao carregar importância das variáveis.")
                 st.exception(error)
 
 
@@ -222,7 +260,9 @@ with tab_about:
         - CI/CD com GitHub Actions;
         - Docker;
         - deploy da API no Render;
-        - frontend no Streamlit Cloud.
+        - frontend no Streamlit Cloud;
+        - separação entre modelo em produção e modelo candidato;
+        - análise de importância das variáveis.
         """
     )
 
