@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from api.schemas import PredictionInput, PredictionOutput
+from ml.predict import predict_rendimento
 
 router = APIRouter()
 
@@ -60,13 +61,9 @@ def get_features():
 
 @router.post("/predict", response_model=PredictionOutput)
 def predict(data: PredictionInput):
-    rendimento_base = 10.0
+    input_data = data.model_dump()
 
-    rendimento_previsto = (
-        rendimento_base
-        + data.idade * 0.15
-        + data.anos_estudo * 2.5
-    )
+    rendimento_previsto = predict_rendimento(input_data)
 
     return {
         "rendimento_hora_previsto": round(rendimento_previsto, 2),
@@ -74,6 +71,6 @@ def predict(data: PredictionInput):
             "min": round(rendimento_previsto * 0.85, 2),
             "max": round(rendimento_previsto * 1.15, 2)
         },
-        "features_usadas": data.model_dump(),
-        "modelo": "baseline_temporario"
+        "features_usadas": input_data,
+        "modelo": "random_forest_sintetico_v1"
     }

@@ -52,7 +52,7 @@ def test_predict_valid_input():
     assert "rendimento_hora_previsto" in data
     assert "intervalo_confianca" in data
     assert "features_usadas" in data
-    assert data["modelo"] == "baseline_temporario"
+    assert data["modelo"] == "random_forest_sintetico_v1"
 
 
 def test_predict_invalid_age():
