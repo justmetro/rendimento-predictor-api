@@ -564,6 +564,8 @@ Para rodar os testes:
 pytest
 ```
 
+Os testes usam um banco SQLite isolado em `data/test_predictions.db`. Esse arquivo é ignorado pelo Git.
+
 Para rodar com cobertura:
 
 ```bash
