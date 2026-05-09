@@ -1,0 +1,73 @@
+EDA - Dataset Sintético de Rendimento
+=============================================
+
+Shape do dataset:
+(1000, 7)
+
+Colunas:
+['idade', 'sexo', 'cor_raca', 'anos_estudo', 'setor', 'regiao', 'rendimento_hora']
+
+Tipos das variáveis:
+idade                int64
+sexo                object
+cor_raca            object
+anos_estudo          int64
+setor               object
+regiao              object
+rendimento_hora    float64
+dtype: object
+
+Valores ausentes:
+idade              0
+sexo               0
+cor_raca           0
+anos_estudo        0
+setor              0
+regiao             0
+rendimento_hora    0
+dtype: int64
+
+Estatísticas descritivas:
+             idade  anos_estudo  rendimento_hora
+count  1000.000000  1000.000000      1000.000000
+mean     41.575000     9.831000        43.592496
+std      13.765677     6.020855        18.109841
+min      18.000000     0.000000         5.000000
+25%      30.000000     5.000000        29.526822
+50%      42.000000    10.000000        42.667703
+75%      53.000000    15.000000        58.021011
+max      65.000000    20.000000        86.760446
+
+Distribuição por sexo:
+sexo
+F    517
+M    483
+Name: count, dtype: int64
+
+Distribuição por região:
+regiao
+Sudeste         220
+Sul             199
+Nordeste        197
+Centro-Oeste    197
+Norte           187
+Name: count, dtype: int64
+
+Média de rendimento por região:
+regiao
+Sul             46.770047
+Sudeste         45.397772
+Nordeste        42.110399
+Centro-Oeste    41.969967
+Norte           41.357831
+Name: rendimento_hora, dtype: float64
+
+Média de rendimento por setor:
+setor
+Servicos       45.117350
+Comercio       44.712030
+Construcao     43.754280
+Industria      42.349993
+Agricultura    41.704917
+Name: rendimento_hora, dtype: float64
+
