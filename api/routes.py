@@ -1,6 +1,10 @@
 from fastapi import APIRouter
 
 from api.schemas import PredictionInput, PredictionOutput
+from ml.feature_importance import (
+    get_production_feature_importance,
+    get_real_feature_importance,
+)
 from ml.model_info import load_model_metrics, load_real_model_metrics
 from ml.predict import predict_rendimento
 
@@ -21,7 +25,7 @@ def health_check():
     return {
         "status": "ok",
         "model_loaded": True,
-        "version": "1.1.0"
+        "version": "1.2.0"
     }
 
 
@@ -68,6 +72,16 @@ def get_model_info():
 @router.get("/model-info/real")
 def get_real_model_info():
     return load_real_model_metrics()
+
+
+@router.get("/feature-importance")
+def get_feature_importance():
+    return get_production_feature_importance()
+
+
+@router.get("/feature-importance/real")
+def get_real_feature_importance_endpoint():
+    return get_real_feature_importance()
 
 
 @router.post("/predict", response_model=PredictionOutput)

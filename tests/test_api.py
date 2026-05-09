@@ -64,6 +64,36 @@ def test_real_model_info_endpoint():
     assert data["target"] == "rendimento_hora"
 
 
+def test_feature_importance_endpoint():
+    response = client.get("/feature-importance")
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["model_name"] == "random_forest_sintetico_v1"
+    assert data["model_type"] == "production"
+    assert "feature_importance" in data
+    assert len(data["feature_importance"]) > 0
+    assert "feature" in data["feature_importance"][0]
+    assert "importance" in data["feature_importance"][0]
+
+
+def test_real_feature_importance_endpoint():
+    response = client.get("/feature-importance/real")
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["model_name"] == "random_forest_real_v1"
+    assert data["model_type"] == "candidate"
+    assert "feature_importance" in data
+    assert len(data["feature_importance"]) > 0
+    assert "feature" in data["feature_importance"][0]
+    assert "importance" in data["feature_importance"][0]
+
+
 def test_predict_valid_input():
     payload = {
         "idade": 35,
