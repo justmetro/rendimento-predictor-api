@@ -2,7 +2,7 @@
 
 API REST desenvolvida com FastAPI para predizer rendimento por hora com base em características sociodemográficas e profissionais.
 
-Este projeto combina Machine Learning, backend, testes automatizados e CI/CD, simulando um fluxo completo de desenvolvimento de uma API preditiva.
+Este projeto combina Machine Learning, backend, testes automatizados, EDA, visualização de dados e CI/CD, simulando um fluxo completo de desenvolvimento de uma API preditiva.
 
 ## Objetivo
 
@@ -15,6 +15,7 @@ Construir uma API capaz de receber dados como idade, sexo, cor/raça, anos de es
 - Scikit-learn
 - Pandas
 - NumPy
+- Matplotlib
 - Joblib
 - Pytest
 - GitHub Actions
@@ -90,7 +91,7 @@ Exemplo de saída:
 O modelo atual é um baseline treinado com dados sintéticos, usado para validar o fluxo completo:
 
 ```txt
-dados → treino → modelo salvo → API → predição → testes → CI/CD
+dados → EDA → treino → modelo salvo → API → predição → testes → CI/CD
 ```
 
 Métricas atuais:
@@ -139,6 +140,25 @@ A EDA inclui:
 - distribuição por região
 - média de rendimento por região
 - média de rendimento por setor
+- gráficos exploratórios em PNG
+
+## Visualizações da EDA
+
+### Distribuição do rendimento por hora
+
+![Distribuição do rendimento por hora](data/processed/plots/target_distribution.png)
+
+### Média de rendimento por região
+
+![Média de rendimento por região](data/processed/plots/rendimento_by_regiao.png)
+
+### Média de rendimento por setor
+
+![Média de rendimento por setor](data/processed/plots/rendimento_by_setor.png)
+
+### Idade vs rendimento por hora
+
+![Idade vs rendimento por hora](data/processed/plots/idade_vs_rendimento.png)
 
 ## Como rodar localmente
 
