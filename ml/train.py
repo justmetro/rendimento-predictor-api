@@ -1,3 +1,4 @@
+import json
 import os
 
 import joblib
@@ -99,12 +100,20 @@ def train_model():
     joblib.dump(pipeline, "data/models/rendimento_model.pkl")
 
     metrics = {
+        "model_name": "random_forest_sintetico_v1",
         "rmse": round(rmse, 2),
         "mae": round(mae, 2),
         "r2": round(r2, 3),
+        "n_rows": len(df),
+        "features": features,
+        "target": target,
     }
 
+    with open("data/models/metrics.json", "w", encoding="utf-8") as file:
+        json.dump(metrics, file, indent=4, ensure_ascii=False)
+
     print("Modelo treinado e salvo em data/models/rendimento_model.pkl")
+    print("Métricas salvas em data/models/metrics.json")
     print(metrics)
 
     return metrics
