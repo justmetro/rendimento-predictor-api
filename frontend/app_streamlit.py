@@ -146,6 +146,7 @@ with st.sidebar:
     st.markdown("- `/feature-importance`")
     st.markdown("- `/feature-importance/real`")
     st.markdown("- `/predict`")
+    st.markdown("- `/history`")
 
     st.warning(
         "O modelo em produção ainda usa dados sintéticos. "
@@ -153,11 +154,12 @@ with st.sidebar:
     )
 
 
-tab_predict, tab_models, tab_comparison, tab_about = st.tabs(
+tab_predict, tab_models, tab_comparison, tab_history, tab_about = st.tabs(
     [
         "Predição",
         "Modelos",
         "Comparação",
+        "Histórico",
         "Sobre",
     ]
 )
@@ -331,6 +333,34 @@ with tab_comparison:
 
         except requests.exceptions.RequestException as error:
             st.error("Erro ao carregar comparação de modelos.")
+            st.exception(error)
+
+
+with tab_history:
+    st.subheader("Histórico de predições")
+
+    history_limit = st.slider(
+        "Limite de registros",
+        min_value=1,
+        max_value=50,
+        value=10,
+    )
+
+    if st.button("Carregar histórico"):
+        try:
+            history = load_json(f"/history?limit={history_limit}")
+            total_returned = history["total_returned"]
+            predictions = history["predictions"]
+
+            st.metric("Total retornado", total_returned)
+
+            if not predictions:
+                st.warning("Nenhuma predição encontrada no histórico.")
+            else:
+                st.dataframe(predictions, use_container_width=True)
+
+        except requests.exceptions.RequestException as error:
+            st.error("Erro ao carregar histórico de predições.")
             st.exception(error)
 
 
