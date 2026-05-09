@@ -101,6 +101,45 @@ MAE: 4.99
 R²: 0.861
 ```
 
+## Dados sintéticos e EDA
+
+Antes da integração com dados reais do IBGE/PNAD, o projeto utiliza um dataset sintético para validar o fluxo completo de Machine Learning e API.
+
+O dataset sintético é gerado por:
+
+```bash
+python -m scripts.generate_data
+```
+
+Esse comando cria o arquivo:
+
+```txt
+data/processed/synthetic_rendimento.csv
+```
+
+A análise exploratória inicial pode ser gerada com:
+
+```bash
+python -m scripts.eda_synthetic
+```
+
+Esse comando cria o relatório:
+
+```txt
+data/processed/eda_summary.txt
+```
+
+A EDA inclui:
+
+- shape do dataset
+- tipos das variáveis
+- valores ausentes
+- estatísticas descritivas
+- distribuição por sexo
+- distribuição por região
+- média de rendimento por região
+- média de rendimento por setor
+
 ## Como rodar localmente
 
 Clone o repositório:
@@ -121,6 +160,18 @@ Instale as dependências:
 
 ```bash
 pip install -r requirements.txt
+```
+
+Gere os dados sintéticos:
+
+```bash
+python -m scripts.generate_data
+```
+
+Gere a EDA inicial:
+
+```bash
+python -m scripts.eda_synthetic
 ```
 
 Treine o modelo:
@@ -162,8 +213,8 @@ O projeto usa GitHub Actions para rodar os testes automaticamente a cada push na
 ## Próximos passos
 
 - Substituir dados sintéticos por dados públicos reais do IBGE/PNAD
-- Adicionar análise exploratória dos dados
+- Adicionar análise exploratória dos dados reais
 - Melhorar feature engineering
 - Comparar modelos: Regressão Linear, Random Forest e XGBoost
 - Adicionar banco de dados para salvar predições
-- Fazer deploy da APIa
+- Fazer deploy da API
