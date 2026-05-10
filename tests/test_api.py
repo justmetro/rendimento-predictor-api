@@ -224,8 +224,51 @@ def test_features_endpoint():
 
     assert data["target"] == "rendimento_hora"
     assert "features" in data
-    assert "idade" in data["features"]
-    assert "sexo" in data["features"]
+    assert set(data["features"]) == {
+        "idade",
+        "sexo",
+        "cor_raca",
+        "anos_estudo",
+        "setor",
+        "regiao",
+    }
+    assert data["features"]["idade"] == {
+        "type": "int",
+        "min": IDADE_MIN,
+        "max": IDADE_MAX,
+    }
+    assert data["features"]["anos_estudo"] == {
+        "type": "int",
+        "min": ANOS_ESTUDO_MIN,
+        "max": ANOS_ESTUDO_MAX,
+    }
+    assert data["features"]["sexo"] == {
+        "type": "category",
+        "values": SEXO_OPTIONS,
+    }
+    assert data["features"]["cor_raca"] == {
+        "type": "category",
+        "values": COR_RACA_OPTIONS,
+    }
+    assert data["features"]["setor"] == {
+        "type": "category",
+        "values": SETOR_OPTIONS,
+    }
+    assert data["features"]["regiao"] == {
+        "type": "category",
+        "values": REGIAO_OPTIONS,
+    }
+
+
+def test_features_endpoint_is_listed_in_openapi():
+    response = client.get("/openapi.json")
+
+    assert response.status_code == 200
+
+    schema = response.json()
+
+    assert "/features" in schema["paths"]
+    assert "get" in schema["paths"]["/features"]
 
 
 def test_model_info_endpoint():

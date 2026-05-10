@@ -127,8 +127,8 @@ def get_features():
         "features": {
             "idade": {
                 "type": "int",
-                "min": 18,
-                "max": 80
+                "min": IDADE_MIN,
+                "max": IDADE_MAX
             },
             "sexo": {
                 "type": "category",
