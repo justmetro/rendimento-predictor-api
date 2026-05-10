@@ -71,6 +71,31 @@ class HealthOutput(BaseModel):
     version: str
 
 
+class FeatureNumericInfo(BaseModel):
+    type: Literal["int"]
+    min: int
+    max: int
+
+
+class FeatureCategoricalInfo(BaseModel):
+    type: Literal["category"]
+    values: list[str]
+
+
+class FeaturesInfo(BaseModel):
+    idade: FeatureNumericInfo
+    sexo: FeatureCategoricalInfo
+    cor_raca: FeatureCategoricalInfo
+    anos_estudo: FeatureNumericInfo
+    setor: FeatureCategoricalInfo
+    regiao: FeatureCategoricalInfo
+
+
+class FeaturesOutput(BaseModel):
+    target: str
+    features: FeaturesInfo
+
+
 class PredictionInterval(BaseModel):
     min: float
     max: float

@@ -260,15 +260,26 @@ def test_features_endpoint():
     }
 
 
-def test_features_endpoint_is_listed_in_openapi():
+def test_features_openapi_response_model_contract():
     response = client.get("/openapi.json")
 
     assert response.status_code == 200
 
     schema = response.json()
+    features_schema = schema["paths"]["/features"]["get"]["responses"]["200"][
+        "content"
+    ]["application/json"]["schema"]
 
     assert "/features" in schema["paths"]
     assert "get" in schema["paths"]["/features"]
+    assert features_schema == {"$ref": "#/components/schemas/FeaturesOutput"}
+    assert "FeaturesOutput" in schema["components"]["schemas"]
+    assert "FeaturesInfo" in schema["components"]["schemas"]
+    assert "FeatureNumericInfo" in schema["components"]["schemas"]
+    assert "FeatureCategoricalInfo" in schema["components"]["schemas"]
+
+    features_output = schema["components"]["schemas"]["FeaturesOutput"]
+    assert set(features_output["required"]) == {"target", "features"}
 
 
 def test_features_and_metadata_are_consistent():

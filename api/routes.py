@@ -15,6 +15,7 @@ from core.config import (
     SEXO_OPTIONS,
 )
 from api.schemas import (
+    FeaturesOutput,
     HealthOutput,
     HistoryOutput,
     MetadataOutput,
@@ -120,7 +121,7 @@ def get_metadata():
     }
 
 
-@router.get("/features")
+@router.get("/features", response_model=FeaturesOutput)
 def get_features():
     return {
         "target": "rendimento_hora",
