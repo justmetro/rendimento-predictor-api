@@ -4,12 +4,40 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class PredictionInput(BaseModel):
-    idade: int = Field(..., ge=14, le=100)
-    sexo: Literal["M", "F"]
-    cor_raca: Literal["Branca", "Preta", "Parda", "Amarela", "Indigena"]
-    anos_estudo: int = Field(..., ge=0, le=20)
-    setor: Literal["Servicos", "Industria", "Comercio", "Agricultura", "Construcao"]
-    regiao: Literal["Norte", "Nordeste", "Centro-Oeste", "Sudeste", "Sul"]
+    idade: int = Field(
+        ...,
+        ge=14,
+        le=100,
+        description="Idade da pessoa em anos completos.",
+        examples=[35],
+    )
+    sexo: Literal["M", "F"] = Field(
+        ...,
+        description="Sexo informado no formato categórico aceito pelo modelo.",
+        examples=["M"],
+    )
+    cor_raca: Literal["Branca", "Preta", "Parda", "Amarela", "Indigena"] = Field(
+        ...,
+        description="Categoria de cor ou raça aceita pelo modelo.",
+        examples=["Branca"],
+    )
+    anos_estudo: int = Field(
+        ...,
+        ge=0,
+        le=20,
+        description="Quantidade de anos de estudo concluídos.",
+        examples=[12],
+    )
+    setor: Literal["Servicos", "Industria", "Comercio", "Agricultura", "Construcao"] = Field(
+        ...,
+        description="Setor de atividade profissional aceito pelo modelo.",
+        examples=["Servicos"],
+    )
+    regiao: Literal["Norte", "Nordeste", "Centro-Oeste", "Sudeste", "Sul"] = Field(
+        ...,
+        description="Região do Brasil associada ao registro.",
+        examples=["Sudeste"],
+    )
 
     model_config = {
         "json_schema_extra": {

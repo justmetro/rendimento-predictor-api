@@ -306,6 +306,28 @@ def test_predict_openapi_input_validation_contract():
         "Sudeste",
         "Sul",
     ]
+    assert properties["idade"]["description"] == "Idade da pessoa em anos completos."
+    assert properties["sexo"]["description"] == (
+        "Sexo informado no formato categórico aceito pelo modelo."
+    )
+    assert properties["cor_raca"]["description"] == (
+        "Categoria de cor ou raça aceita pelo modelo."
+    )
+    assert properties["anos_estudo"]["description"] == (
+        "Quantidade de anos de estudo concluídos."
+    )
+    assert properties["setor"]["description"] == (
+        "Setor de atividade profissional aceito pelo modelo."
+    )
+    assert properties["regiao"]["description"] == (
+        "Região do Brasil associada ao registro."
+    )
+    assert properties["idade"]["examples"] == [35]
+    assert properties["sexo"]["examples"] == ["M"]
+    assert properties["cor_raca"]["examples"] == ["Branca"]
+    assert properties["anos_estudo"]["examples"] == [12]
+    assert properties["setor"]["examples"] == ["Servicos"]
+    assert properties["regiao"]["examples"] == ["Sudeste"]
 
 
 def test_predict_rate_limit_returns_429(monkeypatch):
