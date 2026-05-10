@@ -40,7 +40,7 @@ def test_health_endpoint():
     assert data["database_connected"] is True
     assert data["app_name"] == "Rendimento Predictor API"
     assert data["model_name"] == "xgboost_pnad_real_production_v1"
-    assert data["version"] == "2.5"
+    assert data["version"] == "2.6"
 
 
 def test_health_openapi_response_model_contract():
@@ -154,6 +154,68 @@ def test_metrics_openapi_response_model_contract():
     assert metrics_output["properties"]["model_rmse"]["type"] == "number"
     assert metrics_output["properties"]["model_mae"]["type"] == "number"
     assert metrics_output["properties"]["model_r2"]["type"] == "number"
+
+
+def test_metadata_endpoint():
+    response = client.get("/metadata")
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["app_name"] == "Rendimento Predictor API"
+    assert data["version"] == "2.6"
+    assert data["model_name"] == "xgboost_pnad_real_production_v1"
+    assert data["prediction_endpoint"] == "/predict"
+    assert data["numeric_constraints"]["idade"] == {"min": 14, "max": 100}
+    assert data["numeric_constraints"]["anos_estudo"] == {"min": 0, "max": 20}
+    assert data["categorical_options"]["sexo"] == ["M", "F"]
+    assert data["categorical_options"]["cor_raca"] == [
+        "Branca",
+        "Preta",
+        "Parda",
+        "Amarela",
+        "Indigena",
+    ]
+    assert data["categorical_options"]["setor"] == [
+        "Servicos",
+        "Industria",
+        "Comercio",
+        "Agricultura",
+        "Construcao",
+    ]
+    assert data["categorical_options"]["regiao"] == [
+        "Norte",
+        "Nordeste",
+        "Centro-Oeste",
+        "Sudeste",
+        "Sul",
+    ]
+
+
+def test_metadata_openapi_response_model_contract():
+    response = client.get("/openapi.json")
+
+    assert response.status_code == 200
+
+    schema = response.json()
+    metadata_schema = schema["paths"]["/metadata"]["get"]["responses"]["200"][
+        "content"
+    ]["application/json"]["schema"]
+
+    assert metadata_schema == {"$ref": "#/components/schemas/MetadataOutput"}
+
+    metadata_output = schema["components"]["schemas"]["MetadataOutput"]
+    assert set(metadata_output["required"]) == {
+        "app_name",
+        "version",
+        "model_name",
+        "prediction_endpoint",
+        "numeric_constraints",
+        "categorical_options",
+    }
+    assert metadata_output["properties"]["numeric_constraints"]["type"] == "object"
+    assert metadata_output["properties"]["categorical_options"]["type"] == "object"
 
 
 def test_features_endpoint():

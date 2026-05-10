@@ -3,15 +3,24 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from api.schemas import (
+    ANOS_ESTUDO_MAX,
+    ANOS_ESTUDO_MIN,
+    COR_RACA_OPTIONS,
     HealthOutput,
     HistoryOutput,
+    IDADE_MAX,
+    IDADE_MIN,
+    MetadataOutput,
     MetricsOutput,
     ModelComparisonOutput,
     ModelInfoOutput,
     PredictionInput,
     PredictionOutput,
     ProductionModelInfoOutput,
+    REGIAO_OPTIONS,
     RealModelInfoOutput,
+    SETOR_OPTIONS,
+    SEXO_OPTIONS,
 )
 from api.rate_limit import enforce_predict_rate_limit
 from database.database import check_database_connection, get_db
@@ -36,7 +45,7 @@ from ml.predict import (
 
 router = APIRouter()
 APP_NAME = "Rendimento Predictor API"
-APP_VERSION = "2.5"
+APP_VERSION = "2.6"
 
 
 @router.get("/")
@@ -80,6 +89,32 @@ def get_metrics(db: Session = Depends(get_db)):
         "model_rmse": production_metrics["rmse"],
         "model_mae": production_metrics["mae"],
         "model_r2": production_metrics["r2"],
+    }
+
+
+@router.get("/metadata", response_model=MetadataOutput)
+def get_metadata():
+    return {
+        "app_name": APP_NAME,
+        "version": APP_VERSION,
+        "model_name": MODEL_NAME,
+        "prediction_endpoint": "/predict",
+        "numeric_constraints": {
+            "idade": {
+                "min": IDADE_MIN,
+                "max": IDADE_MAX,
+            },
+            "anos_estudo": {
+                "min": ANOS_ESTUDO_MIN,
+                "max": ANOS_ESTUDO_MAX,
+            },
+        },
+        "categorical_options": {
+            "sexo": SEXO_OPTIONS,
+            "cor_raca": COR_RACA_OPTIONS,
+            "setor": SETOR_OPTIONS,
+            "regiao": REGIAO_OPTIONS,
+        },
     }
 
 

@@ -3,11 +3,21 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 
+IDADE_MIN = 14
+IDADE_MAX = 100
+ANOS_ESTUDO_MIN = 0
+ANOS_ESTUDO_MAX = 20
+SEXO_OPTIONS = ["M", "F"]
+COR_RACA_OPTIONS = ["Branca", "Preta", "Parda", "Amarela", "Indigena"]
+SETOR_OPTIONS = ["Servicos", "Industria", "Comercio", "Agricultura", "Construcao"]
+REGIAO_OPTIONS = ["Norte", "Nordeste", "Centro-Oeste", "Sudeste", "Sul"]
+
+
 class PredictionInput(BaseModel):
     idade: int = Field(
         ...,
-        ge=14,
-        le=100,
+        ge=IDADE_MIN,
+        le=IDADE_MAX,
         description="Idade da pessoa em anos completos.",
         examples=[35],
     )
@@ -23,8 +33,8 @@ class PredictionInput(BaseModel):
     )
     anos_estudo: int = Field(
         ...,
-        ge=0,
-        le=20,
+        ge=ANOS_ESTUDO_MIN,
+        le=ANOS_ESTUDO_MAX,
         description="Quantidade de anos de estudo concluídos.",
         examples=[12],
     )
@@ -114,6 +124,22 @@ class MetricsOutput(BaseModel):
     model_rmse: float
     model_mae: float
     model_r2: float
+
+
+class NumericConstraint(BaseModel):
+    min: int
+    max: int
+
+
+class MetadataOutput(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
+
+    app_name: str
+    version: str
+    model_name: str
+    prediction_endpoint: str
+    numeric_constraints: dict[str, NumericConstraint]
+    categorical_options: dict[str, list[str]]
 
 
 class ModelInfoOutput(BaseModel):
