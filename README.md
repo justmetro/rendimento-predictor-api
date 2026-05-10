@@ -104,6 +104,7 @@ Construir uma aplicação capaz de receber dados como idade, sexo, cor/raça, an
 
 ## Melhorias recentes
 
+- v2.8 — Consistência entre /features, /metadata e core/config.py, com contrato OpenAPI explícito para /features.
 - v2.7 — Centralização de constantes em core/config.py e redução de duplicação entre API, frontend e testes.
 - v2.6 — Endpoint /metadata para integração, frontend consumindo metadados da API e testes de fallback.
 - v2.5 — Observabilidade básica com /metrics, health check informativo e métricas do modelo em produção.
@@ -160,7 +161,7 @@ Retorna metadados para integração com clientes externos e frontend, incluindo 
 GET /features
 ```
 
-Retorna as variáveis aceitas pelo modelo.
+Retorna as variáveis aceitas pelo modelo, com limites numéricos e opções categóricas alinhados ao `core/config.py`.
 
 ### Informações do modelo legado
 
@@ -345,6 +346,8 @@ Se houver falha ao acessar o banco durante a contagem de predições, `/metrics`
 
 O endpoint `GET /metadata` expõe os limites numéricos aceitos pelo `POST /predict` (`idade` de 14 a 100 e `anos_estudo` de 0 a 20), além das opções categóricas aceitas para `sexo`, `cor_raca`, `setor` e `regiao`.
 
+O endpoint `GET /features` expõe os mesmos limites e categorias de forma compatível com o contrato histórico desse endpoint. Testes automatizados garantem que `/features`, `/metadata` e `core/config.py` permaneçam alinhados.
+
 O frontend Streamlit consome `/metadata` para configurar os controles de idade, anos de estudo e categorias. Se `/metadata` falhar, o app mantém fallback local com os mesmos limites e categorias, evitando que a interface deixe de funcionar.
 
 ## Configuração centralizada
@@ -355,7 +358,7 @@ Essas constantes são reutilizadas pelo backend, pelo frontend e pelos testes, r
 
 ## Contratos da API
 
-A API possui contratos de resposta explícitos com Pydantic para os principais endpoints. O `POST /predict` usa `PredictionOutput`, com `intervalo_confianca` e `features_usadas` tipados. Os endpoints `/health`, `/metrics`, `/metadata`, `/model-info`, `/model-info/real`, `/model-info/production`, `/model-comparison` e `/history` também possuem `response_model` dedicado.
+A API possui contratos de resposta explícitos com Pydantic para os principais endpoints. O `POST /predict` usa `PredictionOutput`, com `intervalo_confianca` e `features_usadas` tipados. Os endpoints `/health`, `/metrics`, `/metadata`, `/features`, `/model-info`, `/model-info/real`, `/model-info/production`, `/model-comparison` e `/history` também possuem `response_model` dedicado.
 
 O input do `POST /predict` também possui validação explícita via `PredictionInput`: `idade` aceita valores de 14 a 100, `anos_estudo` aceita valores de 0 a 20, e campos categóricos como `sexo`, `cor_raca`, `setor` e `regiao` aceitam apenas categorias suportadas pelo modelo e pelo frontend. Entradas inválidas, campos obrigatórios ausentes, tipos incorretos, categorias inválidas e limites numéricos fora da faixa são rejeitados com HTTP 422.
 
