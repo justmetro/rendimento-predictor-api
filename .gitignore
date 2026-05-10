@@ -45,3 +45,6 @@ dist/
 *.sqlite3
 data/predictions.db
 data/test_predictions.db
+
+# Large raw PNAD files
+data/raw/pnad/
