@@ -11,6 +11,7 @@ from ml.feature_importance import (
 from ml.model_info import (
     load_model_comparison,
     load_model_metrics,
+    load_production_model_metrics,
     load_real_model_metrics,
 )
 from ml.predict import predict_rendimento
@@ -80,6 +81,11 @@ def get_model_info():
 @router.get("/model-info/real")
 def get_real_model_info():
     return load_real_model_metrics()
+
+
+@router.get("/model-info/production")
+def get_production_model_info():
+    return load_production_model_metrics()
 
 
 @router.get("/model-comparison")

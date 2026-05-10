@@ -65,6 +65,22 @@ def test_real_model_info_endpoint():
     assert data["target"] == "rendimento_hora"
 
 
+def test_production_model_info_endpoint():
+    response = client.get("/model-info/production")
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["model_name"] == "xgboost_pnad_real_production_v1"
+    assert data["data_source"] == "pnad_real_processed"
+    assert data["target"] == "rendimento_hora"
+    assert "rmse" in data
+    assert "mae" in data
+    assert "r2" in data
+    assert "features" in data
+
+
 def test_model_comparison_endpoint():
     response = client.get("/model-comparison")
 

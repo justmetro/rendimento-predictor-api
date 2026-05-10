@@ -4,6 +4,7 @@ from pathlib import Path
 
 METRICS_PATH = Path("data/models/metrics.json")
 REAL_METRICS_PATH = Path("data/models/metrics_real.json")
+PRODUCTION_METRICS_PATH = Path("data/models/metrics_production.json")
 MODEL_COMPARISON_PATH = Path("data/models/model_comparison.json")
 
 
@@ -18,6 +19,10 @@ def load_model_metrics() -> dict:
 
 def load_real_model_metrics() -> dict:
     return load_json_file(REAL_METRICS_PATH)
+
+
+def load_production_model_metrics() -> dict:
+    return load_json_file(PRODUCTION_METRICS_PATH)
 
 
 def load_model_comparison() -> dict:
