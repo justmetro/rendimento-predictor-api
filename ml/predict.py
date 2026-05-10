@@ -9,12 +9,30 @@ METRICS_PATH = Path("data/models/metrics_production.json")
 MODEL_NAME = "xgboost_pnad_real_production_v1"
 
 
+class PredictionModelError(RuntimeError):
+    pass
+
+
 def load_model():
-    return joblib.load(MODEL_PATH)
+    model_path = Path(MODEL_PATH)
+
+    if not model_path.exists():
+        raise PredictionModelError(f"Arquivo do modelo nao encontrado: {model_path}")
+
+    try:
+        return joblib.load(model_path)
+    except Exception as exc:
+        raise PredictionModelError(f"Falha ao carregar modelo: {model_path}") from exc
 
 
 def load_prediction_interval_residuals(metrics_path: Path = METRICS_PATH) -> dict:
-    metrics = json.loads(metrics_path.read_text(encoding="utf-8"))
+    try:
+        metrics = json.loads(metrics_path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        raise PredictionModelError(
+            f"Falha ao carregar metricas de producao: {metrics_path}"
+        ) from exc
+
     residuals = metrics.get("prediction_interval_residuals")
 
     if not residuals:
@@ -46,5 +64,9 @@ model = load_model()
 
 def predict_rendimento(input_data: dict) -> float:
     df = pd.DataFrame([input_data])
-    prediction = model.predict(df)[0]
-    return float(prediction)
+
+    try:
+        prediction = model.predict(df)[0]
+        return float(prediction)
+    except Exception as exc:
+        raise PredictionModelError("Falha ao gerar predicao com o modelo.") from exc

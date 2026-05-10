@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from api.schemas import PredictionInput, PredictionOutput
@@ -14,7 +15,12 @@ from ml.model_info import (
     load_production_model_metrics,
     load_real_model_metrics,
 )
-from ml.predict import MODEL_NAME, build_prediction_interval, predict_rendimento
+from ml.predict import (
+    MODEL_NAME,
+    PredictionModelError,
+    build_prediction_interval,
+    predict_rendimento,
+)
 
 router = APIRouter()
 
@@ -107,9 +113,16 @@ def get_real_feature_importance_endpoint():
 def predict(data: PredictionInput, db: Session = Depends(get_db)):
     input_data = data.model_dump()
 
-    rendimento_previsto = predict_rendimento(input_data)
-    rendimento_previsto_rounded = round(rendimento_previsto, 2)
-    intervalo = build_prediction_interval(rendimento_previsto)
+    try:
+        rendimento_previsto = predict_rendimento(input_data)
+        rendimento_previsto_rounded = round(rendimento_previsto, 2)
+        intervalo = build_prediction_interval(rendimento_previsto)
+    except PredictionModelError as exc:
+        raise HTTPException(
+            status_code=500,
+            detail="Erro interno ao gerar predição.",
+        ) from exc
+
     intervalo_min = intervalo["min"]
     intervalo_max = intervalo["max"]
     modelo = MODEL_NAME
@@ -127,8 +140,11 @@ def predict(data: PredictionInput, db: Session = Depends(get_db)):
         modelo=modelo,
     )
 
-    db.add(prediction_record)
-    db.commit()
+    try:
+        db.add(prediction_record)
+        db.commit()
+    except SQLAlchemyError:
+        db.rollback()
 
     return {
         "rendimento_hora_previsto": rendimento_previsto_rounded,

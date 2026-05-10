@@ -1,5 +1,8 @@
 from fastapi.testclient import TestClient
 
+import api.routes as routes
+from database.database import get_db
+from ml.predict import PredictionModelError
 from main import app
 
 client = TestClient(app)
@@ -157,6 +160,77 @@ def test_predict_valid_input():
     assert "min" in intervalo
     assert "max" in intervalo
     assert intervalo["min"] <= data["rendimento_hora_previsto"] <= intervalo["max"]
+
+
+def test_predict_returns_response_when_history_save_fails():
+    class FailingCommitDb:
+        rollback_called = False
+
+        def add(self, record):
+            self.record = record
+
+        def commit(self):
+            from sqlalchemy.exc import SQLAlchemyError
+
+            raise SQLAlchemyError("commit failed")
+
+        def rollback(self):
+            self.rollback_called = True
+
+    fake_db = FailingCommitDb()
+    previous_override = app.dependency_overrides.get(get_db)
+
+    def override_get_db():
+        yield fake_db
+
+    app.dependency_overrides[get_db] = override_get_db
+
+    payload = {
+        "idade": 35,
+        "sexo": "M",
+        "cor_raca": "Branca",
+        "anos_estudo": 12,
+        "setor": "Servicos",
+        "regiao": "Sudeste"
+    }
+
+    try:
+        response = client.post("/predict", json=payload)
+    finally:
+        if previous_override is None:
+            app.dependency_overrides.pop(get_db, None)
+        else:
+            app.dependency_overrides[get_db] = previous_override
+
+    assert response.status_code == 200
+    assert fake_db.rollback_called is True
+
+    data = response.json()
+
+    assert "rendimento_hora_previsto" in data
+    assert "intervalo_confianca" in data
+    assert data["modelo"] == "xgboost_pnad_real_production_v1"
+
+
+def test_predict_returns_friendly_error_when_model_prediction_fails(monkeypatch):
+    def raise_prediction_error(input_data):
+        raise PredictionModelError("internal model failure")
+
+    monkeypatch.setattr(routes, "predict_rendimento", raise_prediction_error)
+
+    payload = {
+        "idade": 35,
+        "sexo": "M",
+        "cor_raca": "Branca",
+        "anos_estudo": 12,
+        "setor": "Servicos",
+        "regiao": "Sudeste"
+    }
+
+    response = client.post("/predict", json=payload)
+
+    assert response.status_code == 500
+    assert response.json()["detail"] == "Erro interno ao gerar predição."
 
 
 def test_history_endpoint():
