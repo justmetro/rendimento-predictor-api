@@ -388,7 +388,10 @@ def test_history_endpoint():
 
     data = response.json()
 
+    assert isinstance(data, dict)
     assert data["total_returned"] == 1
+    assert isinstance(data["total_returned"], int)
+    assert isinstance(data["predictions"], list)
     assert len(data["predictions"]) == 1
 
     prediction = data["predictions"][0]
@@ -401,9 +404,12 @@ def test_history_endpoint():
     assert prediction["setor"] == payload["setor"]
     assert prediction["regiao"] == payload["regiao"]
     assert "rendimento_hora_previsto" in prediction
+    assert isinstance(prediction["rendimento_hora_previsto"], (int, float))
     assert "intervalo_confianca" in prediction
     assert "min" in prediction["intervalo_confianca"]
     assert "max" in prediction["intervalo_confianca"]
+    assert isinstance(prediction["intervalo_confianca"]["min"], (int, float))
+    assert isinstance(prediction["intervalo_confianca"]["max"], (int, float))
     assert (
         prediction["intervalo_confianca"]["min"]
         <= prediction["rendimento_hora_previsto"]
@@ -411,6 +417,42 @@ def test_history_endpoint():
     )
     assert prediction["modelo"] == "xgboost_pnad_real_production_v1"
     assert "created_at" in prediction
+
+
+def test_history_openapi_response_model_contract():
+    response = client.get("/openapi.json")
+
+    assert response.status_code == 200
+
+    schema = response.json()
+    history_schema = schema["paths"]["/history"]["get"]["responses"]["200"]["content"][
+        "application/json"
+    ]["schema"]
+
+    assert history_schema == {"$ref": "#/components/schemas/HistoryOutput"}
+
+    history_output = schema["components"]["schemas"]["HistoryOutput"]
+    assert set(history_output["required"]) == {"total_returned", "predictions"}
+    assert history_output["properties"]["total_returned"]["type"] == "integer"
+    assert history_output["properties"]["predictions"]["type"] == "array"
+    assert history_output["properties"]["predictions"]["items"] == {
+        "$ref": "#/components/schemas/HistoryPredictionItem"
+    }
+
+    history_item = schema["components"]["schemas"]["HistoryPredictionItem"]
+    assert set(history_item["required"]) == {
+        "id",
+        "idade",
+        "sexo",
+        "cor_raca",
+        "anos_estudo",
+        "setor",
+        "regiao",
+        "rendimento_hora_previsto",
+        "intervalo_confianca",
+        "modelo",
+        "created_at",
+    }
 
 
 def test_predict_invalid_age():

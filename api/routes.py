@@ -3,6 +3,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from api.schemas import (
+    HistoryOutput,
     ModelComparisonOutput,
     ModelInfoOutput,
     PredictionInput,
@@ -172,7 +173,7 @@ def predict(data: PredictionInput, db: Session = Depends(get_db)):
     }
 
 
-@router.get("/history")
+@router.get("/history", response_model=HistoryOutput)
 def get_history(limit: int = 10, db: Session = Depends(get_db)):
     records = (
         db.query(PredictionRecord)

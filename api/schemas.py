@@ -44,6 +44,25 @@ class PredictionOutput(BaseModel):
     modelo: str
 
 
+class HistoryPredictionItem(BaseModel):
+    id: int
+    idade: int
+    sexo: str
+    cor_raca: str
+    anos_estudo: int
+    setor: str
+    regiao: str
+    rendimento_hora_previsto: float
+    intervalo_confianca: PredictionInterval
+    modelo: str
+    created_at: str | None
+
+
+class HistoryOutput(BaseModel):
+    total_returned: int
+    predictions: list[HistoryPredictionItem]
+
+
 class ModelInfoOutput(BaseModel):
     model_config = ConfigDict(protected_namespaces=())
 
