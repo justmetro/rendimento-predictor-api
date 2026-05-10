@@ -15,7 +15,7 @@ https://rendimento-predictor-api.streamlit.app/
 A interface permite:
 
 - preencher dados para predição;
-- consultar o modelo legado ainda usado por `/predict`;
+- consultar o modelo de produção usado por `/predict`;
 - consultar o modelo candidato do pipeline real;
 - consultar o modelo de produção treinado com PNAD real;
 - visualizar métricas dos modelos;
@@ -44,7 +44,7 @@ Health check:
 https://rendimento-predictor-api.onrender.com/health
 ```
 
-Informações do modelo legado usado por `/predict`:
+Informações do modelo legado:
 
 ```txt
 https://rendimento-predictor-api.onrender.com/model-info
@@ -131,7 +131,7 @@ Retorna as variáveis aceitas pelo modelo.
 GET /model-info
 ```
 
-Retorna métricas e informações do modelo legado sintético, atualmente usado no endpoint `/predict`.
+Retorna métricas e informações do modelo legado sintético, mantido como baseline histórico.
 
 ### Informações do modelo candidato
 
@@ -148,8 +148,6 @@ GET /model-info/production
 ```
 
 Retorna métricas e informações do modelo XGBoost treinado com microdados reais da PNAD Contínua 2023 trimestre 1.
-
-Aviso: o endpoint `POST /predict` ainda usa o modelo legado até a próxima etapa de promoção final.
 
 ### Comparação de modelos
 
@@ -217,7 +215,7 @@ Exemplo de saída:
     "setor": "Servicos",
     "regiao": "Sudeste"
   },
-  "modelo": "random_forest_sintetico_v1"
+  "modelo": "xgboost_pnad_real_production_v1"
 }
 ```
 
@@ -254,7 +252,7 @@ Exemplo de saída:
         "min": 42.9,
         "max": 58.05
       },
-      "modelo": "random_forest_sintetico_v1",
+      "modelo": "xgboost_pnad_real_production_v1",
       "created_at": "2026-05-09T12:00:00"
     }
   ]
@@ -271,15 +269,25 @@ O projeto usa SQLite local para registrar as predições realizadas pela API.
 - O endpoint `GET /history` consulta as últimas predições salvas.
 - Não há Alembic nesta etapa; a tabela é criada automaticamente ao iniciar a API ou manualmente com `python -m database.init_db`.
 
-## Modelo legado
+## Modelo atual
 
-O modelo legado é um baseline treinado com dados sintéticos, usado para validar o fluxo completo:
+O modelo atual em produção é `xgboost_pnad_real_production_v1`, treinado com microdados reais da PNAD Contínua 2023 trimestre 1.
 
 ```txt
-dados → EDA → treino → comparação de modelos → modelo salvo → API → frontend → testes → CI/CD → deploy
+Modelo: xgboost_pnad_real_production_v1
+Algoritmo: XGBoost
+Dados: PNAD Contínua 2023 trimestre 1
+Linhas finais após limpeza: 175.132
+RMSE: 5.86
+MAE: 4.34
+R²: 0.333
 ```
 
-Esse ainda é o modelo usado pelo endpoint `POST /predict` até a próxima etapa de promoção final.
+Esse é o modelo carregado pelo endpoint `POST /predict`.
+
+## Modelo legado
+
+O modelo legado é um baseline treinado com dados sintéticos, mantido como histórico do projeto e como referência de evolução do pipeline:
 
 Métricas do modelo legado:
 
@@ -317,8 +325,6 @@ As métricas desse modelo estão disponíveis em:
 ```http
 GET /model-info/production
 ```
-
-Aviso: apesar de já existir como artefato treinado e documentado, esse modelo ainda não foi conectado ao endpoint `POST /predict`.
 
 ## Comparação de modelos
 
@@ -393,9 +399,9 @@ data/models/metrics_production.json
 O objetivo é separar claramente:
 
 ```txt
-modelo legado → baseline sintético ainda usado pela API em /predict
+modelo legado → baseline sintético histórico
 modelo candidato → treinado pelo pipeline real e exposto em /model-info/real
-modelo de produção → XGBoost treinado com PNAD real e exposto em /model-info/production
+modelo de produção → XGBoost treinado com PNAD real, usado em /predict e exposto em /model-info/production
 comparação → modelos avaliados e expostos em /model-comparison
 ```
 
@@ -419,7 +425,7 @@ Esses endpoints ajudam a entender quais variáveis mais influenciam a predição
 
 ## Dados sintéticos e EDA
 
-Antes da integração com dados reais do IBGE/PNAD, o projeto utiliza um dataset sintético para validar o fluxo completo de Machine Learning e API.
+Antes da integração com dados reais do IBGE/PNAD, o projeto utilizava um dataset sintético para validar o fluxo completo de Machine Learning e API.
 
 O dataset sintético é gerado por:
 
@@ -657,7 +663,6 @@ APP_ENV = "production"
 
 ## Próximos passos
 
-- Conectar o modelo de produção PNAD real ao endpoint `POST /predict`
 - Expor feature importance do modelo XGBoost de produção
 - Aprofundar análise exploratória dos microdados reais
 - Melhorar feature engineering
