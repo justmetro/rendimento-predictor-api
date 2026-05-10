@@ -185,6 +185,12 @@ Retorna as variáveis mais importantes para o modelo candidato treinado pelo pip
 POST /predict
 ```
 
+Retorna a predição de rendimento por hora usando o modelo `xgboost_pnad_real_production_v1`.
+O campo `intervalo_confianca` mantém o mesmo formato da API, mas agora é estimado
+com percentis 5 e 95 dos resíduos observados no conjunto de teste do modelo de
+produção. Esse intervalo é empírico e baseado em resíduos; ainda não é uma
+abordagem de quantile regression nem bootstrap.
+
 Exemplo de entrada:
 
 ```json
@@ -281,6 +287,7 @@ Linhas finais após limpeza: 175.132
 RMSE: 5.86
 MAE: 4.34
 R²: 0.333
+Método de intervalo: residual_percentile_5_95
 ```
 
 Esse é o modelo carregado pelo endpoint `POST /predict`.
