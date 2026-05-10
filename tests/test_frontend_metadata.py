@@ -1,4 +1,6 @@
 import requests
+import subprocess
+import sys
 
 from core.config import (
     ANOS_ESTUDO_MAX,
@@ -100,3 +102,18 @@ def test_fetch_metadata_returns_fallback_when_api_call_fails(monkeypatch):
     monkeypatch.setattr("frontend.metadata.requests.get", raise_request_error)
 
     assert fetch_metadata("http://api.example") == FALLBACK_METADATA
+
+
+def test_metadata_can_be_imported_from_frontend_directory():
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            "import metadata; assert metadata.FALLBACK_METADATA",
+        ],
+        cwd="frontend",
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stderr

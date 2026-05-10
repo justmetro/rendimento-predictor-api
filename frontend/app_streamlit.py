@@ -3,11 +3,18 @@ import os
 import requests
 import streamlit as st
 
-from frontend.metadata import (
-    fetch_metadata,
-    get_categorical_options,
-    get_numeric_constraint,
-)
+try:
+    from frontend.metadata import (
+        fetch_metadata,
+        get_categorical_options,
+        get_numeric_constraint,
+    )
+except ModuleNotFoundError:
+    from metadata import (
+        fetch_metadata,
+        get_categorical_options,
+        get_numeric_constraint,
+    )
 
 
 PRODUCTION_API_URL = "https://rendimento-predictor-api.onrender.com"
