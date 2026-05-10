@@ -6,6 +6,24 @@ import streamlit as st
 
 PRODUCTION_API_URL = "https://rendimento-predictor-api.onrender.com"
 LOCAL_API_URL = "http://localhost:8000"
+FALLBACK_METADATA = {
+    "numeric_constraints": {
+        "idade": {
+            "min": 14,
+            "max": 100,
+        },
+        "anos_estudo": {
+            "min": 0,
+            "max": 20,
+        },
+    },
+    "categorical_options": {
+        "sexo": ["M", "F"],
+        "cor_raca": ["Branca", "Preta", "Parda", "Amarela", "Indigena"],
+        "setor": ["Servicos", "Industria", "Comercio", "Agricultura", "Construcao"],
+        "regiao": ["Norte", "Nordeste", "Centro-Oeste", "Sudeste", "Sul"],
+    },
+}
 
 
 def get_api_url() -> str:
@@ -59,6 +77,42 @@ def load_json(endpoint: str) -> dict:
     )
     response.raise_for_status()
     return response.json()
+
+
+def load_metadata() -> dict:
+    try:
+        return load_json("/metadata")
+    except requests.exceptions.RequestException:
+        return FALLBACK_METADATA
+
+
+def get_numeric_constraint(metadata: dict, field: str) -> tuple[int, int]:
+    fallback = FALLBACK_METADATA["numeric_constraints"][field]
+    constraints = metadata.get("numeric_constraints", {}).get(field, {})
+
+    return (
+        int(constraints.get("min", fallback["min"])),
+        int(constraints.get("max", fallback["max"])),
+    )
+
+
+def get_categorical_options(metadata: dict, field: str) -> list[str]:
+    fallback = FALLBACK_METADATA["categorical_options"][field]
+    options = metadata.get("categorical_options", {}).get(field)
+
+    if not options:
+        return fallback
+
+    return list(options)
+
+
+METADATA = load_metadata()
+IDADE_MIN, IDADE_MAX = get_numeric_constraint(METADATA, "idade")
+ANOS_ESTUDO_MIN, ANOS_ESTUDO_MAX = get_numeric_constraint(METADATA, "anos_estudo")
+SEXO_OPTIONS = get_categorical_options(METADATA, "sexo")
+COR_RACA_OPTIONS = get_categorical_options(METADATA, "cor_raca")
+SETOR_OPTIONS = get_categorical_options(METADATA, "setor")
+REGIAO_OPTIONS = get_categorical_options(METADATA, "regiao")
 
 
 def render_model_metrics(model_info: dict) -> None:
@@ -189,36 +243,36 @@ with tab_predict:
 
     idade = st.slider(
         "Idade",
-        min_value=18,
-        max_value=80,
+        min_value=IDADE_MIN,
+        max_value=IDADE_MAX,
         value=35,
     )
 
     sexo = st.selectbox(
         "Sexo",
-        options=["M", "F"],
+        options=SEXO_OPTIONS,
     )
 
     cor_raca = st.selectbox(
         "Cor/Raça",
-        options=["Branca", "Preta", "Parda", "Amarela", "Indigena"],
+        options=COR_RACA_OPTIONS,
     )
 
     anos_estudo = st.slider(
         "Anos de estudo",
-        min_value=0,
-        max_value=20,
+        min_value=ANOS_ESTUDO_MIN,
+        max_value=ANOS_ESTUDO_MAX,
         value=12,
     )
 
     setor = st.selectbox(
         "Setor",
-        options=["Servicos", "Industria", "Comercio", "Agricultura", "Construcao"],
+        options=SETOR_OPTIONS,
     )
 
     regiao = st.selectbox(
         "Região",
-        options=["Norte", "Nordeste", "Centro-Oeste", "Sudeste", "Sul"],
+        options=REGIAO_OPTIONS,
     )
 
     payload = {
