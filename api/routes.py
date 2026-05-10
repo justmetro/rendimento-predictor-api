@@ -132,24 +132,24 @@ def get_features():
             },
             "sexo": {
                 "type": "category",
-                "values": ["M", "F"]
+                "values": SEXO_OPTIONS
             },
             "cor_raca": {
                 "type": "category",
-                "values": ["Branca", "Preta", "Parda", "Amarela", "Indigena"]
+                "values": COR_RACA_OPTIONS
             },
             "anos_estudo": {
                 "type": "int",
-                "min": 0,
-                "max": 20
+                "min": ANOS_ESTUDO_MIN,
+                "max": ANOS_ESTUDO_MAX
             },
             "setor": {
                 "type": "category",
-                "values": ["Servicos", "Industria", "Comercio", "Agricultura", "Construcao"]
+                "values": SETOR_OPTIONS
             },
             "regiao": {
                 "type": "category",
-                "values": ["Norte", "Nordeste", "Centro-Oeste", "Sudeste", "Sul"]
+                "values": REGIAO_OPTIONS
             }
         }
     }
