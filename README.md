@@ -15,8 +15,9 @@ https://rendimento-predictor-api.streamlit.app/
 A interface permite:
 
 - preencher dados para predição;
-- consultar o modelo em produção;
+- consultar o modelo legado ainda usado por `/predict`;
 - consultar o modelo candidato do pipeline real;
+- consultar o modelo de produção treinado com PNAD real;
 - visualizar métricas dos modelos;
 - visualizar importância das variáveis;
 - comparar Regressão Linear, Random Forest e XGBoost;
@@ -43,7 +44,7 @@ Health check:
 https://rendimento-predictor-api.onrender.com/health
 ```
 
-Informações do modelo em produção:
+Informações do modelo legado usado por `/predict`:
 
 ```txt
 https://rendimento-predictor-api.onrender.com/model-info
@@ -55,13 +56,19 @@ Informações do modelo candidato do pipeline real:
 https://rendimento-predictor-api.onrender.com/model-info/real
 ```
 
+Informações do modelo de produção treinado com PNAD real:
+
+```txt
+https://rendimento-predictor-api.onrender.com/model-info/production
+```
+
 Comparação de modelos:
 
 ```txt
 https://rendimento-predictor-api.onrender.com/model-comparison
 ```
 
-Importância das variáveis do modelo em produção:
+Importância das variáveis do modelo legado:
 
 ```txt
 https://rendimento-predictor-api.onrender.com/feature-importance
@@ -118,13 +125,13 @@ GET /features
 
 Retorna as variáveis aceitas pelo modelo.
 
-### Informações do modelo em produção
+### Informações do modelo legado
 
 ```http
 GET /model-info
 ```
 
-Retorna métricas e informações do modelo atualmente usado no endpoint `/predict`.
+Retorna métricas e informações do modelo legado sintético, atualmente usado no endpoint `/predict`.
 
 ### Informações do modelo candidato
 
@@ -132,9 +139,17 @@ Retorna métricas e informações do modelo atualmente usado no endpoint `/predi
 GET /model-info/real
 ```
 
-Retorna métricas e informações do modelo treinado pelo pipeline de dados reais padronizados.
+Retorna métricas e informações do modelo candidato treinado pelo pipeline real anterior.
 
-Atualmente, esse modelo candidato ainda utiliza um arquivo no formato real padronizado para validar o pipeline. A próxima etapa é substituir esse arquivo por dados reais de fato da PNAD/IBGE.
+### Informações do modelo de produção
+
+```http
+GET /model-info/production
+```
+
+Retorna métricas e informações do modelo XGBoost treinado com microdados reais da PNAD Contínua 2023 trimestre 1.
+
+Aviso: o endpoint `POST /predict` ainda usa o modelo legado até a próxima etapa de promoção final.
 
 ### Comparação de modelos
 
@@ -150,13 +165,13 @@ Retorna a comparação entre os modelos treinados no pipeline:
 
 A comparação inclui RMSE, MAE, R², média de R² em validação cruzada e desvio padrão da validação cruzada.
 
-### Importância das variáveis do modelo em produção
+### Importância das variáveis do modelo legado
 
 ```http
 GET /feature-importance
 ```
 
-Retorna as variáveis mais importantes para o modelo atualmente usado pela API.
+Retorna as variáveis mais importantes para o modelo legado atualmente usado pela API.
 
 ### Importância das variáveis do modelo candidato
 
@@ -256,15 +271,17 @@ O projeto usa SQLite local para registrar as predições realizadas pela API.
 - O endpoint `GET /history` consulta as últimas predições salvas.
 - Não há Alembic nesta etapa; a tabela é criada automaticamente ao iniciar a API ou manualmente com `python -m database.init_db`.
 
-## Modelo atual
+## Modelo legado
 
-O modelo atual em produção é um baseline treinado com dados sintéticos, usado para validar o fluxo completo:
+O modelo legado é um baseline treinado com dados sintéticos, usado para validar o fluxo completo:
 
 ```txt
 dados → EDA → treino → comparação de modelos → modelo salvo → API → frontend → testes → CI/CD → deploy
 ```
 
-Métricas atuais do modelo em produção:
+Esse ainda é o modelo usado pelo endpoint `POST /predict` até a próxima etapa de promoção final.
+
+Métricas do modelo legado:
 
 ```txt
 RMSE: 6.42
@@ -272,9 +289,40 @@ MAE: 4.99
 R²: 0.861
 ```
 
+## Modelo de produção
+
+O modelo de produção foi treinado com microdados reais da PNAD Contínua 2023 trimestre 1, a partir do arquivo de largura fixa oficial e do layout SAS.
+
+```txt
+Modelo: xgboost_pnad_real_production_v1
+Algoritmo: XGBoost
+Dados: PNAD Contínua 2023 trimestre 1
+Linhas lidas pelo parser: 473.335
+Linhas finais após limpeza: 175.132
+RMSE: 5.86
+MAE: 4.34
+R²: 0.333
+```
+
+Artefatos gerados:
+
+```txt
+data/processed/pnad_real_processed.csv
+data/models/rendimento_model_production.pkl
+data/models/metrics_production.json
+```
+
+As métricas desse modelo estão disponíveis em:
+
+```http
+GET /model-info/production
+```
+
+Aviso: apesar de já existir como artefato treinado e documentado, esse modelo ainda não foi conectado ao endpoint `POST /predict`.
+
 ## Comparação de modelos
 
-O projeto compara três abordagens de modelagem:
+O projeto compara três abordagens de modelagem sobre o dataset real processado da PNAD:
 
 ```txt
 Regressão Linear
@@ -285,14 +333,12 @@ XGBoost
 Resultado atual da comparação:
 
 ```txt
-Melhor modelo por RMSE: linear_regression
+Melhor modelo por RMSE: xgboost
 
-linear_regression → RMSE 5.76 | MAE 4.57 | R² 0.888
-random_forest     → RMSE 6.42 | MAE 4.99 | R² 0.861
-xgboost           → RMSE 6.51 | MAE 5.14 | R² 0.857
+linear_regression → RMSE 6.16 | MAE 4.64 | R² 0.263
+random_forest     → RMSE 5.90 | MAE 4.37 | R² 0.325
+xgboost           → RMSE 5.86 | MAE 4.34 | R² 0.333
 ```
-
-Como o dataset atual ainda é sintético e foi gerado com uma relação aproximadamente linear, a Regressão Linear apresenta melhor desempenho nesta etapa.
 
 A comparação é gerada por:
 
@@ -308,21 +354,27 @@ data/models/model_comparison.json
 
 ## Pipeline de dados reais
 
-A partir da versão 1.1, o projeto também possui um pipeline separado para dados reais padronizados.
+O projeto possui um pipeline para transformar microdados reais da PNAD Contínua em um dataset tabular usado no treinamento dos modelos.
 
 Arquivos principais:
 
 ```txt
+scripts/download_pnad.py
+scripts/extract_pnad_zip.py
+scripts/inspect_pnad_input.py
+scripts/parse_pnad_real.py
 scripts/prepare_real_data.py
 scripts/eda_real.py
 ml/train_real.py
 ml/compare_models.py
+ml/train_production.py
 ```
 
-Esse pipeline lê um CSV em:
+O parser real lê o arquivo de largura fixa da PNAD usando as posições do layout SAS:
 
 ```txt
-data/raw/pnad_real.csv
+data/raw/pnad/input_PNADC_trimestre1.txt
+data/raw/pnad/extracted/PNADC_2023_trimestre1/PNADC_2023_trimestre1.txt
 ```
 
 E gera:
@@ -334,13 +386,16 @@ data/processed/real_plots/
 data/models/rendimento_model_real.pkl
 data/models/metrics_real.json
 data/models/model_comparison.json
+data/models/rendimento_model_production.pkl
+data/models/metrics_production.json
 ```
 
 O objetivo é separar claramente:
 
 ```txt
-modelo em produção → usado pela API em /predict
+modelo legado → baseline sintético ainda usado pela API em /predict
 modelo candidato → treinado pelo pipeline real e exposto em /model-info/real
+modelo de produção → XGBoost treinado com PNAD real e exposto em /model-info/production
 comparação → modelos avaliados e expostos em /model-comparison
 ```
 
@@ -348,7 +403,7 @@ comparação → modelos avaliados e expostos em /model-comparison
 
 O projeto expõe a importância das variáveis dos modelos Random Forest.
 
-Para o modelo em produção:
+Para o modelo legado:
 
 ```bash
 GET /feature-importance
@@ -478,10 +533,22 @@ Treine o modelo candidato do pipeline real:
 python -m ml.train_real
 ```
 
+Parseie os microdados reais da PNAD Contínua 2023 trimestre 1:
+
+```bash
+python -m scripts.parse_pnad_real data/raw/pnad/extracted/PNADC_2023_trimestre1/PNADC_2023_trimestre1.txt
+```
+
 Compare os modelos:
 
 ```bash
 python -m ml.compare_models
+```
+
+Treine o modelo de produção com PNAD real:
+
+```bash
+python -m ml.train_production
 ```
 
 Inicialize o banco SQLite, se quiser criar a tabela manualmente:
@@ -590,9 +657,8 @@ APP_ENV = "production"
 
 ## Próximos passos
 
-- Substituir o arquivo padronizado de exemplo por dados públicos reais do IBGE/PNAD
-- Adicionar análise exploratória dos dados reais completos
+- Conectar o modelo de produção PNAD real ao endpoint `POST /predict`
+- Expor feature importance do modelo XGBoost de produção
+- Aprofundar análise exploratória dos microdados reais
 - Melhorar feature engineering
-- Promover o melhor modelo candidato para produção
-- Adicionar banco de dados para salvar predições
 - Melhorar a interface web
