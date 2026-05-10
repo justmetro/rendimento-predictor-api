@@ -102,8 +102,15 @@ https://rendimento-predictor-api.onrender.com/history
 
 Construir uma aplicação capaz de receber dados como idade, sexo, cor/raça, anos de estudo, setor e região, e retornar uma estimativa de rendimento por hora.
 
+## Status do projeto
+
+Versão final e estável de portfólio: `v3.0`.
+
+Esta release consolida API FastAPI publicada no Render, frontend Streamlit publicado no Streamlit Cloud, modelo XGBoost treinado com microdados reais da PNAD Contínua 2023 trimestre 1, contratos OpenAPI/Pydantic, observabilidade, testes automatizados, Docker, CI/CD e deploy validado.
+
 ## Melhorias recentes
 
+- v3.0 — Release final de portfólio com API, frontend, modelo real PNAD, observabilidade, contratos OpenAPI, testes, CI/CD e deploy validado.
 - v2.9 — Revisão leve de qualidade, redução de duplicação interna em metadados e fallback mais resiliente no frontend.
 - v2.8 — Consistência entre /features, /metadata e core/config.py, com contrato OpenAPI explícito para /features.
 - v2.7 — Centralização de constantes em core/config.py e redução de duplicação entre API, frontend e testes.
