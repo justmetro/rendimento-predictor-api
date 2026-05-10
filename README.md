@@ -19,7 +19,7 @@ A interface permite:
 - consultar o modelo candidato do pipeline real;
 - consultar o modelo de produção treinado com PNAD real;
 - visualizar métricas dos modelos;
-- visualizar importância das variáveis;
+- visualizar importância das variáveis, incluindo o modelo de produção PNAD real;
 - comparar Regressão Linear, Random Forest e XGBoost;
 - visualizar histórico de predições;
 - visualizar informações gerais do projeto.
@@ -78,6 +78,12 @@ Importância das variáveis do modelo candidato:
 
 ```txt
 https://rendimento-predictor-api.onrender.com/feature-importance/real
+```
+
+Importância das variáveis do modelo de produção PNAD real:
+
+```txt
+https://rendimento-predictor-api.onrender.com/feature-importance/production
 ```
 
 Histórico de predições:
@@ -179,13 +185,21 @@ GET /feature-importance/real
 
 Retorna as variáveis mais importantes para o modelo candidato treinado pelo pipeline real.
 
+### Importância das variáveis do modelo de produção
+
+```http
+GET /feature-importance/production
+```
+
+Retorna a importância das variáveis do modelo XGBoost `xgboost_pnad_real_production_v1`, treinado com microdados reais da PNAD Contínua.
+
 ### Predição
 
 ```http
 POST /predict
 ```
 
-Retorna a predição de rendimento por hora usando o modelo `xgboost_pnad_real_production_v1`.
+Retorna a predição de rendimento por hora usando o modelo real de produção `xgboost_pnad_real_production_v1`.
 O campo `intervalo_confianca` mantém o mesmo formato da API, mas agora é estimado
 com percentis 5 e 95 dos resíduos observados no conjunto de teste do modelo de
 produção. Esse intervalo é empírico e baseado em resíduos; ainda não é uma
@@ -193,6 +207,8 @@ abordagem de quantile regression nem bootstrap.
 
 Em caso de falha interna ao gerar a predição, a API retorna uma mensagem amigável.
 Falhas ao salvar o histórico no banco não impedem o retorno da predição.
+O endpoint possui rate limiting simples de 30 requisições por minuto por IP; ao
+exceder o limite, a API retorna HTTP 429.
 
 Exemplo de entrada:
 
@@ -278,11 +294,13 @@ O projeto usa SQLite local para registrar as predições realizadas pela API.
 - O endpoint `GET /history` consulta as últimas predições salvas.
 - Não há Alembic nesta etapa; a tabela é criada automaticamente ao iniciar a API ou manualmente com `python -m database.init_db`.
 
-## Robustez da predição
+## Robustez da API
 
 O carregamento do modelo de produção possui tratamento explícito para arquivo ausente ou falha de desserialização. Durante o `POST /predict`, falhas internas do modelo são convertidas em erro amigável para o cliente.
 
 A persistência do histórico é isolada da predição: se o banco falhar ao salvar o registro, a transação é revertida e a API ainda retorna a predição calculada.
+
+O endpoint `POST /predict` também possui rate limiting simples em memória: 30 requisições por minuto por IP. Endpoints de leitura, como `/health`, `/model-info`, `/history` e feature importance, não são limitados.
 
 ## Modelo atual
 
