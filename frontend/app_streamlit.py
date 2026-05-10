@@ -160,6 +160,7 @@ with st.sidebar:
     st.markdown("- `/features`")
     st.markdown("- `/model-info`")
     st.markdown("- `/model-info/real`")
+    st.markdown("- `/model-info/production`")
     st.markdown("- `/model-comparison`")
     st.markdown("- `/feature-importance`")
     st.markdown("- `/feature-importance/real`")
@@ -280,26 +281,31 @@ with tab_models:
 
     st.write(
         """
-        O modelo em produção é o modelo atualmente utilizado pelo endpoint `/predict`.
-        O modelo candidato representa o pipeline separado para dados reais padronizados.
+        O modelo legado é o baseline sintético antigo. O modelo candidato representa
+        o pipeline real anterior. O modelo de produção é o XGBoost treinado com
+        microdados reais da PNAD.
         """
     )
 
     model_option = st.radio(
         "Escolha o modelo",
         options=[
-            "Modelo em produção",
+            "Modelo legado",
             "Modelo candidato",
+            "Modelo de produção",
         ],
         horizontal=True,
     )
 
-    if model_option == "Modelo em produção":
+    if model_option == "Modelo legado":
         model_info_endpoint = "/model-info"
         feature_importance_endpoint = "/feature-importance"
-    else:
+    elif model_option == "Modelo candidato":
         model_info_endpoint = "/model-info/real"
         feature_importance_endpoint = "/feature-importance/real"
+    else:
+        model_info_endpoint = "/model-info/production"
+        feature_importance_endpoint = None
 
     col_metrics, col_importance = st.columns(2)
 
@@ -318,7 +324,11 @@ with tab_models:
     with col_importance:
         st.markdown("### Feature importance")
 
-        if st.button("Carregar importância das variáveis"):
+        if feature_importance_endpoint is None:
+            st.warning(
+                "Feature importance do modelo de produção ainda não foi exposta pela API."
+            )
+        elif st.button("Carregar importância das variáveis"):
             try:
                 feature_importance = load_json(feature_importance_endpoint)
                 render_feature_importance(feature_importance)
