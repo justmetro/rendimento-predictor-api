@@ -1,22 +1,33 @@
 import requests
 
+from core.config import (
+    ANOS_ESTUDO_MAX,
+    ANOS_ESTUDO_MIN,
+    COR_RACA_OPTIONS,
+    IDADE_MAX,
+    IDADE_MIN,
+    REGIAO_OPTIONS,
+    SETOR_OPTIONS,
+    SEXO_OPTIONS,
+)
+
 
 FALLBACK_METADATA = {
     "numeric_constraints": {
         "idade": {
-            "min": 14,
-            "max": 100,
+            "min": IDADE_MIN,
+            "max": IDADE_MAX,
         },
         "anos_estudo": {
-            "min": 0,
-            "max": 20,
+            "min": ANOS_ESTUDO_MIN,
+            "max": ANOS_ESTUDO_MAX,
         },
     },
     "categorical_options": {
-        "sexo": ["M", "F"],
-        "cor_raca": ["Branca", "Preta", "Parda", "Amarela", "Indigena"],
-        "setor": ["Servicos", "Industria", "Comercio", "Agricultura", "Construcao"],
-        "regiao": ["Norte", "Nordeste", "Centro-Oeste", "Sudeste", "Sul"],
+        "sexo": SEXO_OPTIONS,
+        "cor_raca": COR_RACA_OPTIONS,
+        "setor": SETOR_OPTIONS,
+        "regiao": REGIAO_OPTIONS,
     },
 }
 

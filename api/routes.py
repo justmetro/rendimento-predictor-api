@@ -2,14 +2,21 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from api.schemas import (
+from core.config import (
     ANOS_ESTUDO_MAX,
     ANOS_ESTUDO_MIN,
+    APP_NAME,
+    APP_VERSION,
     COR_RACA_OPTIONS,
-    HealthOutput,
-    HistoryOutput,
     IDADE_MAX,
     IDADE_MIN,
+    REGIAO_OPTIONS,
+    SETOR_OPTIONS,
+    SEXO_OPTIONS,
+)
+from api.schemas import (
+    HealthOutput,
+    HistoryOutput,
     MetadataOutput,
     MetricsOutput,
     ModelComparisonOutput,
@@ -17,10 +24,7 @@ from api.schemas import (
     PredictionInput,
     PredictionOutput,
     ProductionModelInfoOutput,
-    REGIAO_OPTIONS,
     RealModelInfoOutput,
-    SETOR_OPTIONS,
-    SEXO_OPTIONS,
 )
 from api.rate_limit import enforce_predict_rate_limit
 from database.database import check_database_connection, get_db
@@ -44,8 +48,6 @@ from ml.predict import (
 )
 
 router = APIRouter()
-APP_NAME = "Rendimento Predictor API"
-APP_VERSION = "2.6"
 
 
 @router.get("/")
