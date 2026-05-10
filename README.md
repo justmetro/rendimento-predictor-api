@@ -191,6 +191,9 @@ com percentis 5 e 95 dos resíduos observados no conjunto de teste do modelo de
 produção. Esse intervalo é empírico e baseado em resíduos; ainda não é uma
 abordagem de quantile regression nem bootstrap.
 
+Em caso de falha interna ao gerar a predição, a API retorna uma mensagem amigável.
+Falhas ao salvar o histórico no banco não impedem o retorno da predição.
+
 Exemplo de entrada:
 
 ```json
@@ -274,6 +277,12 @@ O projeto usa SQLite local para registrar as predições realizadas pela API.
 - Cada chamada para `POST /predict` salva uma nova predição.
 - O endpoint `GET /history` consulta as últimas predições salvas.
 - Não há Alembic nesta etapa; a tabela é criada automaticamente ao iniciar a API ou manualmente com `python -m database.init_db`.
+
+## Robustez da predição
+
+O carregamento do modelo de produção possui tratamento explícito para arquivo ausente ou falha de desserialização. Durante o `POST /predict`, falhas internas do modelo são convertidas em erro amigável para o cliente.
+
+A persistência do histórico é isolada da predição: se o banco falhar ao salvar o registro, a transação é revertida e a API ainda retorna a predição calculada.
 
 ## Modelo atual
 
