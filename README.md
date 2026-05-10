@@ -44,6 +44,12 @@ Health check:
 https://rendimento-predictor-api.onrender.com/health
 ```
 
+Métricas básicas da aplicação:
+
+```txt
+https://rendimento-predictor-api.onrender.com/metrics
+```
+
 Informações do modelo legado:
 
 ```txt
@@ -98,6 +104,7 @@ Construir uma aplicação capaz de receber dados como idade, sexo, cor/raça, an
 
 ## Melhorias recentes
 
+- v2.5 — Observabilidade básica com /metrics, health check informativo e métricas do modelo em produção.
 - v2.4 — Validação robusta do input do /predict, documentação OpenAPI enriquecida e testes para payloads inválidos.
 - v2.3 — Contratos explícitos da API com Pydantic, documentação OpenAPI mais precisa e testes de contrato.
 - v2.2 — Robustez em produção, rate limiting e feature importance do modelo de produção.
@@ -128,6 +135,14 @@ GET /health
 ```
 
 Retorna o status da API.
+
+### Métricas da aplicação
+
+```http
+GET /metrics
+```
+
+Retorna métricas básicas de observabilidade da API, incluindo nome da aplicação, status, modelo em produção, total de predições salvas no histórico e métricas do modelo de produção (`model_rmse`, `model_mae` e `model_r2`).
 
 ### Features
 
@@ -308,9 +323,17 @@ A persistência do histórico é isolada da predição: se o banco falhar ao sal
 
 O endpoint `POST /predict` também possui rate limiting simples em memória: 30 requisições por minuto por IP. Endpoints de leitura, como `/health`, `/model-info`, `/history` e feature importance, não são limitados.
 
+## Observabilidade
+
+A API possui observabilidade básica por meio dos endpoints `GET /health` e `GET /metrics`. O health check retorna informações úteis para produção, incluindo `app_name`, `status`, `model_loaded`, `database_connected`, `model_name` e `version`.
+
+O endpoint `GET /metrics` expõe `app_name`, `status`, `model_name`, `total_predictions`, `model_rmse`, `model_mae` e `model_r2`. A contagem `total_predictions` vem do banco de histórico, enquanto as métricas do modelo usam a mesma fonte do endpoint `/model-info/production`.
+
+Se houver falha ao acessar o banco durante a contagem de predições, `/metrics` responde de forma controlada com `status` igual a `degraded`, `total_predictions` igual a `0` e rollback da transação.
+
 ## Contratos da API
 
-A API possui contratos de resposta explícitos com Pydantic para os principais endpoints. O `POST /predict` usa `PredictionOutput`, com `intervalo_confianca` e `features_usadas` tipados. Os endpoints `/model-info`, `/model-info/real`, `/model-info/production`, `/model-comparison` e `/history` também possuem `response_model` dedicado.
+A API possui contratos de resposta explícitos com Pydantic para os principais endpoints. O `POST /predict` usa `PredictionOutput`, com `intervalo_confianca` e `features_usadas` tipados. Os endpoints `/health`, `/metrics`, `/model-info`, `/model-info/real`, `/model-info/production`, `/model-comparison` e `/history` também possuem `response_model` dedicado.
 
 O input do `POST /predict` também possui validação explícita via `PredictionInput`: `idade` aceita valores de 14 a 100, `anos_estudo` aceita valores de 0 a 20, e campos categóricos como `sexo`, `cor_raca`, `setor` e `regiao` aceitam apenas categorias suportadas pelo modelo e pelo frontend. Entradas inválidas, campos obrigatórios ausentes, tipos incorretos, categorias inválidas e limites numéricos fora da faixa são rejeitados com HTTP 422.
 
