@@ -96,6 +96,10 @@ https://rendimento-predictor-api.onrender.com/history
 
 Construir uma aplicação capaz de receber dados como idade, sexo, cor/raça, anos de estudo, setor e região, e retornar uma estimativa de rendimento por hora.
 
+## Melhorias recentes
+
+- v2.2 — Robustez em produção, rate limiting e feature importance do modelo de produção.
+
 ## Tecnologias utilizadas
 
 - Python
@@ -206,7 +210,7 @@ produção. Esse intervalo é empírico e baseado em resíduos; ainda não é um
 abordagem de quantile regression nem bootstrap.
 
 Em caso de falha interna ao gerar a predição, a API retorna uma mensagem amigável.
-Falhas ao salvar o histórico no banco não impedem o retorno da predição.
+Falhas ao salvar o histórico no banco não impedem o retorno da predição e geram rollback da transação.
 O endpoint possui rate limiting simples de 30 requisições por minuto por IP; ao
 exceder o limite, a API retorna HTTP 429.
 
@@ -441,7 +445,7 @@ comparação → modelos avaliados e expostos em /model-comparison
 
 ## Importância das variáveis
 
-O projeto expõe a importância das variáveis dos modelos Random Forest.
+O projeto expõe a importância das variáveis dos modelos legado, candidato e de produção. O frontend Streamlit consome a feature importance do modelo de produção para refletir o mesmo modelo usado pelo `POST /predict`.
 
 Para o modelo legado:
 
@@ -453,6 +457,12 @@ Para o modelo candidato:
 
 ```bash
 GET /feature-importance/real
+```
+
+Para o modelo de produção:
+
+```bash
+GET /feature-importance/production
 ```
 
 Esses endpoints ajudam a entender quais variáveis mais influenciam a predição, como idade, anos de estudo, região, setor, sexo e cor/raça.
@@ -697,7 +707,6 @@ APP_ENV = "production"
 
 ## Próximos passos
 
-- Expor feature importance do modelo XGBoost de produção
 - Aprofundar análise exploratória dos microdados reais
 - Melhorar feature engineering
 - Melhorar a interface web
