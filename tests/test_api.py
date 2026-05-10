@@ -3,6 +3,18 @@ import pytest
 
 import api.routes as routes
 import api.rate_limit as rate_limit
+from core.config import (
+    ANOS_ESTUDO_MAX,
+    ANOS_ESTUDO_MIN,
+    APP_NAME,
+    APP_VERSION,
+    COR_RACA_OPTIONS,
+    IDADE_MAX,
+    IDADE_MIN,
+    REGIAO_OPTIONS,
+    SETOR_OPTIONS,
+    SEXO_OPTIONS,
+)
 from database.database import get_db
 from ml.predict import PredictionModelError
 from main import app
@@ -38,9 +50,9 @@ def test_health_endpoint():
     assert data["status"] == "ok"
     assert data["model_loaded"] is True
     assert data["database_connected"] is True
-    assert data["app_name"] == "Rendimento Predictor API"
+    assert data["app_name"] == APP_NAME
     assert data["model_name"] == "xgboost_pnad_real_production_v1"
-    assert data["version"] == "2.6"
+    assert data["version"] == APP_VERSION
 
 
 def test_health_openapi_response_model_contract():
@@ -75,7 +87,7 @@ def test_metrics_endpoint():
 
     data = response.json()
 
-    assert data["app_name"] == "Rendimento Predictor API"
+    assert data["app_name"] == APP_NAME
     assert data["status"] == "ok"
     assert data["model_name"] == "xgboost_pnad_real_production_v1"
     assert isinstance(data["total_predictions"], int)
@@ -118,7 +130,7 @@ def test_metrics_returns_controlled_response_when_database_fails():
     assert response.status_code == 200
     assert fake_db.rollback_called is True
     assert response.json() == {
-        "app_name": "Rendimento Predictor API",
+        "app_name": APP_NAME,
         "status": "degraded",
         "model_name": "xgboost_pnad_real_production_v1",
         "total_predictions": 0,
@@ -163,34 +175,19 @@ def test_metadata_endpoint():
 
     data = response.json()
 
-    assert data["app_name"] == "Rendimento Predictor API"
-    assert data["version"] == "2.6"
+    assert data["app_name"] == APP_NAME
+    assert data["version"] == APP_VERSION
     assert data["model_name"] == "xgboost_pnad_real_production_v1"
     assert data["prediction_endpoint"] == "/predict"
-    assert data["numeric_constraints"]["idade"] == {"min": 14, "max": 100}
-    assert data["numeric_constraints"]["anos_estudo"] == {"min": 0, "max": 20}
-    assert data["categorical_options"]["sexo"] == ["M", "F"]
-    assert data["categorical_options"]["cor_raca"] == [
-        "Branca",
-        "Preta",
-        "Parda",
-        "Amarela",
-        "Indigena",
-    ]
-    assert data["categorical_options"]["setor"] == [
-        "Servicos",
-        "Industria",
-        "Comercio",
-        "Agricultura",
-        "Construcao",
-    ]
-    assert data["categorical_options"]["regiao"] == [
-        "Norte",
-        "Nordeste",
-        "Centro-Oeste",
-        "Sudeste",
-        "Sul",
-    ]
+    assert data["numeric_constraints"]["idade"] == {"min": IDADE_MIN, "max": IDADE_MAX}
+    assert data["numeric_constraints"]["anos_estudo"] == {
+        "min": ANOS_ESTUDO_MIN,
+        "max": ANOS_ESTUDO_MAX,
+    }
+    assert data["categorical_options"]["sexo"] == SEXO_OPTIONS
+    assert data["categorical_options"]["cor_raca"] == COR_RACA_OPTIONS
+    assert data["categorical_options"]["setor"] == SETOR_OPTIONS
+    assert data["categorical_options"]["regiao"] == REGIAO_OPTIONS
 
 
 def test_metadata_openapi_response_model_contract():
@@ -473,32 +470,14 @@ def test_predict_openapi_input_validation_contract():
     prediction_input = schema["components"]["schemas"]["PredictionInput"]
     properties = prediction_input["properties"]
 
-    assert properties["idade"]["minimum"] == 14
-    assert properties["idade"]["maximum"] == 100
-    assert properties["anos_estudo"]["minimum"] == 0
-    assert properties["anos_estudo"]["maximum"] == 20
-    assert properties["sexo"]["enum"] == ["M", "F"]
-    assert properties["cor_raca"]["enum"] == [
-        "Branca",
-        "Preta",
-        "Parda",
-        "Amarela",
-        "Indigena",
-    ]
-    assert properties["setor"]["enum"] == [
-        "Servicos",
-        "Industria",
-        "Comercio",
-        "Agricultura",
-        "Construcao",
-    ]
-    assert properties["regiao"]["enum"] == [
-        "Norte",
-        "Nordeste",
-        "Centro-Oeste",
-        "Sudeste",
-        "Sul",
-    ]
+    assert properties["idade"]["minimum"] == IDADE_MIN
+    assert properties["idade"]["maximum"] == IDADE_MAX
+    assert properties["anos_estudo"]["minimum"] == ANOS_ESTUDO_MIN
+    assert properties["anos_estudo"]["maximum"] == ANOS_ESTUDO_MAX
+    assert properties["sexo"]["enum"] == SEXO_OPTIONS
+    assert properties["cor_raca"]["enum"] == COR_RACA_OPTIONS
+    assert properties["setor"]["enum"] == SETOR_OPTIONS
+    assert properties["regiao"]["enum"] == REGIAO_OPTIONS
     assert properties["idade"]["description"] == "Idade da pessoa em anos completos."
     assert properties["sexo"]["description"] == (
         "Sexo informado no formato categórico aceito pelo modelo."

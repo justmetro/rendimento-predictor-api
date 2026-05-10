@@ -1,5 +1,14 @@
 import requests
 
+from core.config import (
+    ANOS_ESTUDO_MAX,
+    ANOS_ESTUDO_MIN,
+    IDADE_MAX,
+    IDADE_MIN,
+    REGIAO_OPTIONS,
+    SETOR_OPTIONS,
+    SEXO_OPTIONS,
+)
 from frontend.metadata import (
     FALLBACK_METADATA,
     fetch_metadata,
@@ -26,11 +35,14 @@ def test_get_numeric_constraint_uses_fallback_when_field_is_missing():
         "numeric_constraints": {},
     }
 
-    assert get_numeric_constraint(metadata, "idade") == (14, 100)
+    assert get_numeric_constraint(metadata, "idade") == (IDADE_MIN, IDADE_MAX)
 
 
 def test_get_numeric_constraint_uses_fallback_when_numeric_constraints_is_missing():
-    assert get_numeric_constraint({}, "anos_estudo") == (0, 20)
+    assert get_numeric_constraint({}, "anos_estudo") == (
+        ANOS_ESTUDO_MIN,
+        ANOS_ESTUDO_MAX,
+    )
 
 
 def test_get_categorical_options_returns_metadata_values():
@@ -48,17 +60,11 @@ def test_get_categorical_options_uses_fallback_when_field_is_missing():
         "categorical_options": {},
     }
 
-    assert get_categorical_options(metadata, "regiao") == [
-        "Norte",
-        "Nordeste",
-        "Centro-Oeste",
-        "Sudeste",
-        "Sul",
-    ]
+    assert get_categorical_options(metadata, "regiao") == REGIAO_OPTIONS
 
 
 def test_get_categorical_options_uses_fallback_when_categorical_options_is_missing():
-    assert get_categorical_options({}, "sexo") == ["M", "F"]
+    assert get_categorical_options({}, "sexo") == SEXO_OPTIONS
 
 
 def test_get_categorical_options_uses_fallback_when_options_are_empty():
@@ -68,13 +74,7 @@ def test_get_categorical_options_uses_fallback_when_options_are_empty():
         },
     }
 
-    assert get_categorical_options(metadata, "setor") == [
-        "Servicos",
-        "Industria",
-        "Comercio",
-        "Agricultura",
-        "Construcao",
-    ]
+    assert get_categorical_options(metadata, "setor") == SETOR_OPTIONS
 
 
 def test_fetch_metadata_returns_fallback_when_api_call_fails(monkeypatch):
