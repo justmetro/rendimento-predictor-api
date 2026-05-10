@@ -1,4 +1,5 @@
 from fastapi.testclient import TestClient
+import pytest
 
 import api.routes as routes
 import api.rate_limit as rate_limit
@@ -7,6 +8,17 @@ from ml.predict import PredictionModelError
 from main import app
 
 client = TestClient(app)
+
+
+def valid_prediction_payload():
+    return {
+        "idade": 35,
+        "sexo": "M",
+        "cor_raca": "Branca",
+        "anos_estudo": 12,
+        "setor": "Servicos",
+        "regiao": "Sudeste"
+    }
 
 
 def test_root_endpoint():
@@ -583,6 +595,35 @@ def test_predict_invalid_region_returns_422():
         "setor": "Servicos",
         "regiao": "Exterior"
     }
+
+    response = client.post("/predict", json=payload)
+
+    assert response.status_code == 422
+
+
+@pytest.mark.parametrize(
+    "missing_field",
+    ["idade", "sexo", "cor_raca", "anos_estudo", "setor", "regiao"],
+)
+def test_predict_missing_required_fields_return_422(missing_field):
+    payload = valid_prediction_payload()
+    payload.pop(missing_field)
+
+    response = client.post("/predict", json=payload)
+
+    assert response.status_code == 422
+
+
+@pytest.mark.parametrize(
+    ("field", "invalid_value"),
+    [
+        ("idade", "trinta"),
+        ("anos_estudo", "doze"),
+    ],
+)
+def test_predict_invalid_numeric_field_types_return_422(field, invalid_value):
+    payload = valid_prediction_payload()
+    payload[field] = invalid_value
 
     response = client.post("/predict", json=payload)
 
