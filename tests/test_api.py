@@ -51,6 +51,8 @@ def test_model_info_endpoint():
     assert "r2" in data
     assert "features" in data
     assert data["target"] == "rendimento_hora"
+    assert isinstance(data["n_rows"], int)
+    assert isinstance(data["features"], list)
 
 
 def test_real_model_info_endpoint():
@@ -67,6 +69,8 @@ def test_real_model_info_endpoint():
     assert "r2" in data
     assert "features" in data
     assert data["target"] == "rendimento_hora"
+    assert isinstance(data["n_rows"], int)
+    assert isinstance(data["features"], list)
 
 
 def test_production_model_info_endpoint():
@@ -83,6 +87,14 @@ def test_production_model_info_endpoint():
     assert "mae" in data
     assert "r2" in data
     assert "features" in data
+    assert isinstance(data["n_rows"], int)
+    assert isinstance(data["features"], list)
+    assert data["prediction_interval_method"] == "residual_percentile_5_95"
+    assert "prediction_interval_residuals" in data
+    assert "lower_residual_p05" in data["prediction_interval_residuals"]
+    assert "upper_residual_p95" in data["prediction_interval_residuals"]
+    assert data["promoted_from"] == "model_comparison"
+    assert "note" in data
 
 
 def test_model_comparison_endpoint():
@@ -97,12 +109,60 @@ def test_model_comparison_endpoint():
     assert "models" in data
     assert len(data["models"]) >= 3
     assert "best_model_by_rmse" in data
+    assert isinstance(data["n_rows"], int)
+    assert isinstance(data["features"], list)
 
     model_names = [model["model_name"] for model in data["models"]]
 
     assert "linear_regression" in model_names
     assert "random_forest" in model_names
     assert "xgboost" in model_names
+    assert {"model_name", "rmse", "mae", "r2", "cv_r2_mean", "cv_r2_std"}.issubset(
+        data["models"][0]
+    )
+
+
+def test_model_info_openapi_response_model_contracts():
+    response = client.get("/openapi.json")
+
+    assert response.status_code == 200
+
+    schema = response.json()
+
+    expected_refs = {
+        "/model-info": "#/components/schemas/ModelInfoOutput",
+        "/model-info/real": "#/components/schemas/RealModelInfoOutput",
+        "/model-info/production": "#/components/schemas/ProductionModelInfoOutput",
+        "/model-comparison": "#/components/schemas/ModelComparisonOutput",
+    }
+
+    for path, expected_ref in expected_refs.items():
+        response_schema = schema["paths"][path]["get"]["responses"]["200"]["content"][
+            "application/json"
+        ]["schema"]
+
+        assert response_schema == {"$ref": expected_ref}
+
+    model_info = schema["components"]["schemas"]["ModelInfoOutput"]
+    assert set(model_info["required"]) == {
+        "model_name",
+        "rmse",
+        "mae",
+        "r2",
+        "n_rows",
+        "features",
+        "target",
+    }
+
+    comparison = schema["components"]["schemas"]["ModelComparisonOutput"]
+    assert set(comparison["required"]) == {
+        "data_source",
+        "n_rows",
+        "target",
+        "features",
+        "models",
+        "best_model_by_rmse",
+    }
 
 
 def test_feature_importance_endpoint():

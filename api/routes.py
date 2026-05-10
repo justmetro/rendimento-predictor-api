@@ -2,7 +2,14 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from api.schemas import PredictionInput, PredictionOutput
+from api.schemas import (
+    ModelComparisonOutput,
+    ModelInfoOutput,
+    PredictionInput,
+    PredictionOutput,
+    ProductionModelInfoOutput,
+    RealModelInfoOutput,
+)
 from api.rate_limit import enforce_predict_rate_limit
 from database.database import check_database_connection, get_db
 from database.models import PredictionRecord
@@ -81,22 +88,22 @@ def get_features():
     }
 
 
-@router.get("/model-info")
+@router.get("/model-info", response_model=ModelInfoOutput)
 def get_model_info():
     return load_model_metrics()
 
 
-@router.get("/model-info/real")
+@router.get("/model-info/real", response_model=RealModelInfoOutput)
 def get_real_model_info():
     return load_real_model_metrics()
 
 
-@router.get("/model-info/production")
+@router.get("/model-info/production", response_model=ProductionModelInfoOutput)
 def get_production_model_info():
     return load_production_model_metrics()
 
 
-@router.get("/model-comparison")
+@router.get("/model-comparison", response_model=ModelComparisonOutput)
 def get_model_comparison():
     return load_model_comparison()
 
