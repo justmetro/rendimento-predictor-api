@@ -2,7 +2,7 @@ EDA - Dados Reais Padronizados
 ===================================
 
 Shape do dataset:
-(5, 7)
+(175132, 7)
 
 Colunas:
 ['idade', 'sexo', 'cor_raca', 'anos_estudo', 'setor', 'regiao', 'rendimento_hora']
@@ -28,73 +28,79 @@ rendimento_hora    0
 dtype: int64
 
 Estatísticas descritivas:
-          idade  anos_estudo  rendimento_hora
-count   5.00000      5.00000         5.000000
-mean   35.80000     12.20000        35.300000
-std    11.12205      3.34664        16.589605
-min    23.00000      8.00000        14.800000
-25%    28.00000     10.00000        22.300000
-50%    35.00000     12.00000        38.700000
-75%    42.00000     15.00000        45.500000
-max    51.00000     16.00000        55.200000
+               idade    anos_estudo  rendimento_hora
+count  175132.000000  175132.000000    175132.000000
+mean       40.727782      10.376014        11.381122
+std        13.333053       4.249295         7.106254
+min        18.000000       0.000000         0.031250
+25%        30.000000       8.000000         7.575000
+50%        40.000000      12.000000         9.375000
+75%        51.000000      12.000000        15.625000
+max        80.000000      16.000000        33.125000
 
 Distribuição por sexo:
 sexo
-M    3
-F    2
+M    100824
+F     74308
 Name: count, dtype: int64
 
 Distribuição por cor/raça:
 cor_raca
-Branca    2
-Parda     2
-Preta     1
+Parda       84240
+Branca      69328
+Preta       19605
+Amarela      1080
+Indigena      879
 Name: count, dtype: int64
 
 Distribuição por região:
 regiao
-Sudeste         1
-Nordeste        1
-Sul             1
-Centro-Oeste    1
-Norte           1
+Nordeste        49784
+Sudeste         48981
+Sul             33707
+Norte           23285
+Centro-Oeste    19375
 Name: count, dtype: int64
 
 Distribuição por setor:
 setor
-Servicos       2
-Comercio       1
-Industria      1
-Agricultura    1
+Servicos       49457
+Industria      45906
+Agricultura    45117
+Comercio       25875
+Construcao      8777
 Name: count, dtype: int64
 
 Média de rendimento por sexo:
 sexo
-F    38.75
-M    33.00
+M    11.802998
+F    10.808703
 Name: rendimento_hora, dtype: float64
 
 Média de rendimento por cor/raça:
 cor_raca
-Branca    50.35
-Preta     38.70
-Parda     18.55
+Branca      13.108647
+Amarela     12.452378
+Preta       10.320496
+Parda       10.207541
+Indigena     9.939846
 Name: rendimento_hora, dtype: float64
 
 Média de rendimento por região:
 regiao
-Centro-Oeste    55.2
-Sudeste         45.5
-Sul             38.7
-Nordeste        22.3
-Norte           14.8
+Sul             13.907852
+Centro-Oeste    13.065841
+Sudeste         12.353860
+Norte           10.452633
+Nordeste         8.491924
 Name: rendimento_hora, dtype: float64
 
 Média de rendimento por setor:
 setor
-Servicos       50.35
-Industria      38.70
-Comercio       22.30
-Agricultura    14.80
+Construcao     13.173280
+Comercio       12.244157
+Servicos       12.018963
+Industria      11.007478
+Agricultura    10.218500
 Name: rendimento_hora, dtype: float64
 

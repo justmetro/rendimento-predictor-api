@@ -1,6 +1,6 @@
 {
     "data_source": "pnad_real_processed",
-    "n_rows": 1000,
+    "n_rows": 175132,
     "target": "rendimento_hora",
     "features": [
         "idade",
@@ -13,28 +13,28 @@
     "models": [
         {
             "model_name": "linear_regression",
-            "rmse": 5.76,
-            "mae": 4.57,
-            "r2": 0.888,
-            "cv_r2_mean": 0.884,
-            "cv_r2_std": 0.023
+            "rmse": 6.16,
+            "mae": 4.64,
+            "r2": 0.263,
+            "cv_r2_mean": 0.259,
+            "cv_r2_std": 0.005
         },
         {
             "model_name": "random_forest",
-            "rmse": 6.42,
-            "mae": 4.99,
-            "r2": 0.861,
-            "cv_r2_mean": 0.863,
-            "cv_r2_std": 0.016
+            "rmse": 5.9,
+            "mae": 4.37,
+            "r2": 0.325,
+            "cv_r2_mean": 0.319,
+            "cv_r2_std": 0.005
         },
         {
             "model_name": "xgboost",
-            "rmse": 6.51,
-            "mae": 5.14,
-            "r2": 0.857,
-            "cv_r2_mean": 0.848,
-            "cv_r2_std": 0.022
+            "rmse": 5.86,
+            "mae": 4.34,
+            "r2": 0.333,
+            "cv_r2_mean": 0.329,
+            "cv_r2_std": 0.004
         }
     ],
-    "best_model_by_rmse": "linear_regression"
+    "best_model_by_rmse": "xgboost"
 }
