@@ -14,6 +14,11 @@
         "regiao"
     ],
     "target": "rendimento_hora",
+    "prediction_interval_method": "residual_percentile_5_95",
+    "prediction_interval_residuals": {
+        "lower_residual_p05": -7.93,
+        "upper_residual_p95": 11.92
+    },
     "promoted_from": "model_comparison",
     "note": "Modelo treinado com microdados reais da PNAD Contínua 2023 trimestre 1"
 }

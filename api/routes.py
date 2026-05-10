@@ -14,7 +14,7 @@ from ml.model_info import (
     load_production_model_metrics,
     load_real_model_metrics,
 )
-from ml.predict import MODEL_NAME, predict_rendimento
+from ml.predict import MODEL_NAME, build_prediction_interval, predict_rendimento
 
 router = APIRouter()
 
@@ -109,8 +109,9 @@ def predict(data: PredictionInput, db: Session = Depends(get_db)):
 
     rendimento_previsto = predict_rendimento(input_data)
     rendimento_previsto_rounded = round(rendimento_previsto, 2)
-    intervalo_min = round(rendimento_previsto * 0.85, 2)
-    intervalo_max = round(rendimento_previsto * 1.15, 2)
+    intervalo = build_prediction_interval(rendimento_previsto)
+    intervalo_min = intervalo["min"]
+    intervalo_max = intervalo["max"]
     modelo = MODEL_NAME
 
     prediction_record = PredictionRecord(
@@ -131,10 +132,7 @@ def predict(data: PredictionInput, db: Session = Depends(get_db)):
 
     return {
         "rendimento_hora_previsto": rendimento_previsto_rounded,
-        "intervalo_confianca": {
-            "min": intervalo_min,
-            "max": intervalo_max
-        },
+        "intervalo_confianca": intervalo,
         "features_usadas": input_data,
         "modelo": modelo
     }

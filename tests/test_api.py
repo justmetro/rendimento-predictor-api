@@ -152,6 +152,12 @@ def test_predict_valid_input():
     assert "features_usadas" in data
     assert data["modelo"] == "xgboost_pnad_real_production_v1"
 
+    intervalo = data["intervalo_confianca"]
+
+    assert "min" in intervalo
+    assert "max" in intervalo
+    assert intervalo["min"] <= data["rendimento_hora_previsto"] <= intervalo["max"]
+
 
 def test_history_endpoint():
     payload = {
@@ -188,6 +194,11 @@ def test_history_endpoint():
     assert "intervalo_confianca" in prediction
     assert "min" in prediction["intervalo_confianca"]
     assert "max" in prediction["intervalo_confianca"]
+    assert (
+        prediction["intervalo_confianca"]["min"]
+        <= prediction["rendimento_hora_previsto"]
+        <= prediction["intervalo_confianca"]["max"]
+    )
     assert prediction["modelo"] == "xgboost_pnad_real_production_v1"
     assert "created_at" in prediction
 

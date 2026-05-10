@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 
 import joblib
+import numpy as np
 import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
@@ -66,6 +67,8 @@ def build_metrics(
     mae: float,
     r2: float,
     n_rows: int,
+    lower_residual_p05: float,
+    upper_residual_p95: float,
 ) -> dict:
     return {
         "model_name": MODEL_NAME,
@@ -76,6 +79,11 @@ def build_metrics(
         "n_rows": n_rows,
         "features": FEATURES,
         "target": TARGET,
+        "prediction_interval_method": "residual_percentile_5_95",
+        "prediction_interval_residuals": {
+            "lower_residual_p05": round(lower_residual_p05, 2),
+            "upper_residual_p95": round(upper_residual_p95, 2),
+        },
         "promoted_from": PROMOTED_FROM,
         "note": NOTE,
     }
@@ -108,10 +116,13 @@ def train_production_model(
     pipeline.fit(X_train, y_train)
 
     predictions = pipeline.predict(X_test)
+    residuals = y_test - predictions
 
     rmse = mean_squared_error(y_test, predictions, squared=False)
     mae = mean_absolute_error(y_test, predictions)
     r2 = r2_score(y_test, predictions)
+    lower_residual_p05 = float(np.percentile(residuals, 5))
+    upper_residual_p95 = float(np.percentile(residuals, 95))
 
     model_path.parent.mkdir(parents=True, exist_ok=True)
     joblib.dump(pipeline, model_path)
@@ -121,6 +132,8 @@ def train_production_model(
         mae=mae,
         r2=r2,
         n_rows=len(df),
+        lower_residual_p05=lower_residual_p05,
+        upper_residual_p95=upper_residual_p95,
     )
 
     metrics_path.parent.mkdir(parents=True, exist_ok=True)
