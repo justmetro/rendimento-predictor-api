@@ -32,9 +32,40 @@ def test_health_endpoint():
     response = client.get("/health")
 
     assert response.status_code == 200
-    assert response.json()["status"] == "ok"
-    assert response.json()["model_loaded"] is True
-    assert response.json()["database_connected"] is True
+
+    data = response.json()
+
+    assert data["status"] == "ok"
+    assert data["model_loaded"] is True
+    assert data["database_connected"] is True
+    assert data["app_name"] == "Rendimento Predictor API"
+    assert data["model_name"] == "xgboost_pnad_real_production_v1"
+    assert data["version"] == "2.5"
+
+
+def test_health_openapi_response_model_contract():
+    response = client.get("/openapi.json")
+
+    assert response.status_code == 200
+
+    schema = response.json()
+    health_schema = schema["paths"]["/health"]["get"]["responses"]["200"]["content"][
+        "application/json"
+    ]["schema"]
+
+    assert health_schema == {"$ref": "#/components/schemas/HealthOutput"}
+
+    health_output = schema["components"]["schemas"]["HealthOutput"]
+    assert set(health_output["required"]) == {
+        "app_name",
+        "status",
+        "model_loaded",
+        "database_connected",
+        "model_name",
+        "version",
+    }
+    assert health_output["properties"]["model_loaded"]["type"] == "boolean"
+    assert health_output["properties"]["database_connected"]["type"] == "boolean"
 
 
 def test_metrics_endpoint():

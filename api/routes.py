@@ -3,6 +3,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from api.schemas import (
+    HealthOutput,
     HistoryOutput,
     MetricsOutput,
     ModelComparisonOutput,
@@ -34,24 +35,28 @@ from ml.predict import (
 )
 
 router = APIRouter()
+APP_NAME = "Rendimento Predictor API"
+APP_VERSION = "2.5"
 
 
 @router.get("/")
 def root():
     return {
-        "message": "Rendimento Predictor API",
+        "message": APP_NAME,
         "status": "running",
         "docs": "/docs"
     }
 
 
-@router.get("/health")
+@router.get("/health", response_model=HealthOutput)
 def health_check():
     return {
+        "app_name": APP_NAME,
         "status": "ok",
         "model_loaded": True,
         "database_connected": check_database_connection(),
-        "version": "1.3.0"
+        "model_name": MODEL_NAME,
+        "version": APP_VERSION,
     }
 
 
@@ -67,7 +72,7 @@ def get_metrics(db: Session = Depends(get_db)):
         total_predictions = 0
 
     return {
-        "app_name": "Rendimento Predictor API",
+        "app_name": APP_NAME,
         "status": status,
         "model_name": MODEL_NAME,
         "total_predictions": total_predictions,

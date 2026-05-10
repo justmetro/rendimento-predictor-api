@@ -53,6 +53,17 @@ class PredictionInput(BaseModel):
     }
 
 
+class HealthOutput(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
+
+    app_name: str
+    status: str
+    model_loaded: bool
+    database_connected: bool
+    model_name: str
+    version: str
+
+
 class PredictionInterval(BaseModel):
     min: float
     max: float
