@@ -7,6 +7,7 @@ from ml.train_production import (
     MODEL_PATH,
     TARGET,
     build_pipeline,
+    build_metrics,
     load_real_data,
 )
 
@@ -49,3 +50,20 @@ def test_build_pipeline_uses_expected_steps_and_xgboost_params():
     assert model.learning_rate == 0.08
     assert model.objective == "reg:squarederror"
     assert model.random_state == 42
+
+
+def test_build_metrics_includes_prediction_interval_residuals():
+    metrics = build_metrics(
+        rmse=5.86,
+        mae=4.34,
+        r2=0.333,
+        n_rows=175132,
+        lower_residual_p05=-8.25,
+        upper_residual_p95=9.75,
+    )
+
+    assert metrics["prediction_interval_method"] == "residual_percentile_5_95"
+    assert metrics["prediction_interval_residuals"] == {
+        "lower_residual_p05": -8.25,
+        "upper_residual_p95": 9.75,
+    }
