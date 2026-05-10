@@ -79,6 +79,12 @@ def test_metrics_endpoint():
     assert data["status"] == "ok"
     assert data["model_name"] == "xgboost_pnad_real_production_v1"
     assert isinstance(data["total_predictions"], int)
+    assert data["model_rmse"] == 5.86
+    assert data["model_mae"] == 4.34
+    assert data["model_r2"] == 0.333
+    assert isinstance(data["model_rmse"], (int, float))
+    assert isinstance(data["model_mae"], (int, float))
+    assert isinstance(data["model_r2"], (int, float))
 
 
 def test_metrics_returns_controlled_response_when_database_fails():
@@ -116,6 +122,9 @@ def test_metrics_returns_controlled_response_when_database_fails():
         "status": "degraded",
         "model_name": "xgboost_pnad_real_production_v1",
         "total_predictions": 0,
+        "model_rmse": 5.86,
+        "model_mae": 4.34,
+        "model_r2": 0.333,
     }
 
 
@@ -137,8 +146,14 @@ def test_metrics_openapi_response_model_contract():
         "status",
         "model_name",
         "total_predictions",
+        "model_rmse",
+        "model_mae",
+        "model_r2",
     }
     assert metrics_output["properties"]["total_predictions"]["type"] == "integer"
+    assert metrics_output["properties"]["model_rmse"]["type"] == "number"
+    assert metrics_output["properties"]["model_mae"]["type"] == "number"
+    assert metrics_output["properties"]["model_r2"]["type"] == "number"
 
 
 def test_features_endpoint():

@@ -111,6 +111,9 @@ class MetricsOutput(BaseModel):
     status: str
     model_name: str
     total_predictions: int
+    model_rmse: float
+    model_mae: float
+    model_r2: float
 
 
 class ModelInfoOutput(BaseModel):

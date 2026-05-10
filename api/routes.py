@@ -63,6 +63,7 @@ def health_check():
 @router.get("/metrics", response_model=MetricsOutput)
 def get_metrics(db: Session = Depends(get_db)):
     status = "ok"
+    production_metrics = load_production_model_metrics()
 
     try:
         total_predictions = db.query(PredictionRecord).count()
@@ -76,6 +77,9 @@ def get_metrics(db: Session = Depends(get_db)):
         "status": status,
         "model_name": MODEL_NAME,
         "total_predictions": total_predictions,
+        "model_rmse": production_metrics["rmse"],
+        "model_mae": production_metrics["mae"],
+        "model_r2": production_metrics["r2"],
     }
 
 
