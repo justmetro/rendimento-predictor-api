@@ -98,6 +98,7 @@ Construir uma aplicação capaz de receber dados como idade, sexo, cor/raça, an
 
 ## Melhorias recentes
 
+- v2.4 — Validação robusta do input do /predict, documentação OpenAPI enriquecida e testes para payloads inválidos.
 - v2.3 — Contratos explícitos da API com Pydantic, documentação OpenAPI mais precisa e testes de contrato.
 - v2.2 — Robustez em produção, rate limiting e feature importance do modelo de produção.
 
@@ -310,6 +311,8 @@ O endpoint `POST /predict` também possui rate limiting simples em memória: 30 
 ## Contratos da API
 
 A API possui contratos de resposta explícitos com Pydantic para os principais endpoints. O `POST /predict` usa `PredictionOutput`, com `intervalo_confianca` e `features_usadas` tipados. Os endpoints `/model-info`, `/model-info/real`, `/model-info/production`, `/model-comparison` e `/history` também possuem `response_model` dedicado.
+
+O input do `POST /predict` também possui validação explícita via `PredictionInput`: `idade` aceita valores de 14 a 100, `anos_estudo` aceita valores de 0 a 20, e campos categóricos como `sexo`, `cor_raca`, `setor` e `regiao` aceitam apenas categorias suportadas pelo modelo e pelo frontend. Entradas inválidas, campos obrigatórios ausentes, tipos incorretos, categorias inválidas e limites numéricos fora da faixa são rejeitados com HTTP 422.
 
 Com isso, a documentação automática em `/docs` e `/openapi.json` fica mais precisa para integração com frontend, clientes externos e manutenção. Os contratos principais são cobertos por testes automatizados, incluindo validações do OpenAPI.
 
