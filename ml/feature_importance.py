@@ -3,6 +3,7 @@ import joblib
 
 PRODUCTION_MODEL_PATH = "data/models/rendimento_model.pkl"
 REAL_MODEL_PATH = "data/models/rendimento_model_real.pkl"
+PRODUCTION_PNAD_MODEL_PATH = "data/models/rendimento_model_production.pkl"
 
 
 def clean_feature_name(feature_name: str) -> str:
@@ -52,4 +53,12 @@ def get_real_feature_importance() -> dict:
         "model_name": "random_forest_real_v1",
         "model_type": "candidate",
         "feature_importance": get_feature_importance(REAL_MODEL_PATH),
+    }
+
+
+def get_production_pnad_feature_importance() -> dict:
+    return {
+        "model_name": "xgboost_pnad_real_production_v1",
+        "model_type": "production_pnad_real",
+        "feature_importance": get_feature_importance(PRODUCTION_PNAD_MODEL_PATH),
     }

@@ -134,6 +134,21 @@ def test_real_feature_importance_endpoint():
     assert "importance" in data["feature_importance"][0]
 
 
+def test_production_pnad_feature_importance_endpoint():
+    response = client.get("/feature-importance/production")
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["model_name"] == "xgboost_pnad_real_production_v1"
+    assert data["model_type"] == "production_pnad_real"
+    assert "feature_importance" in data
+    assert len(data["feature_importance"]) > 0
+    assert "feature" in data["feature_importance"][0]
+    assert "importance" in data["feature_importance"][0]
+
+
 def test_predict_valid_input():
     payload = {
         "idade": 35,

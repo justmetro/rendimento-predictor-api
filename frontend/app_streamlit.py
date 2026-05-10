@@ -305,7 +305,7 @@ with tab_models:
         feature_importance_endpoint = "/feature-importance/real"
     else:
         model_info_endpoint = "/model-info/production"
-        feature_importance_endpoint = None
+        feature_importance_endpoint = "/feature-importance/production"
 
     col_metrics, col_importance = st.columns(2)
 
@@ -324,11 +324,7 @@ with tab_models:
     with col_importance:
         st.markdown("### Feature importance")
 
-        if feature_importance_endpoint is None:
-            st.warning(
-                "Feature importance do modelo de produção ainda não foi exposta pela API."
-            )
-        elif st.button("Carregar importância das variáveis"):
+        if st.button("Carregar importância das variáveis"):
             try:
                 feature_importance = load_json(feature_importance_endpoint)
                 render_feature_importance(feature_importance)

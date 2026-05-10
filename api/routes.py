@@ -6,6 +6,7 @@ from api.schemas import PredictionInput, PredictionOutput
 from database.database import check_database_connection, get_db
 from database.models import PredictionRecord
 from ml.feature_importance import (
+    get_production_pnad_feature_importance,
     get_production_feature_importance,
     get_real_feature_importance,
 )
@@ -107,6 +108,11 @@ def get_feature_importance():
 @router.get("/feature-importance/real")
 def get_real_feature_importance_endpoint():
     return get_real_feature_importance()
+
+
+@router.get("/feature-importance/production")
+def get_production_pnad_feature_importance_endpoint():
+    return get_production_pnad_feature_importance()
 
 
 @router.post("/predict", response_model=PredictionOutput)
