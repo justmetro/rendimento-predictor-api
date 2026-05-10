@@ -14,7 +14,7 @@ from ml.model_info import (
     load_production_model_metrics,
     load_real_model_metrics,
 )
-from ml.predict import predict_rendimento
+from ml.predict import MODEL_NAME, predict_rendimento
 
 router = APIRouter()
 
@@ -111,7 +111,7 @@ def predict(data: PredictionInput, db: Session = Depends(get_db)):
     rendimento_previsto_rounded = round(rendimento_previsto, 2)
     intervalo_min = round(rendimento_previsto * 0.85, 2)
     intervalo_max = round(rendimento_previsto * 1.15, 2)
-    modelo = "random_forest_sintetico_v1"
+    modelo = MODEL_NAME
 
     prediction_record = PredictionRecord(
         idade=input_data["idade"],

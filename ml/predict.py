@@ -1,7 +1,8 @@
 import joblib
 import pandas as pd
 
-MODEL_PATH = "data/models/rendimento_model.pkl"
+MODEL_PATH = "data/models/rendimento_model_production.pkl"
+MODEL_NAME = "xgboost_pnad_real_production_v1"
 
 
 def load_model():

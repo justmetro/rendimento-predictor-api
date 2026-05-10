@@ -150,7 +150,7 @@ def test_predict_valid_input():
     assert "rendimento_hora_previsto" in data
     assert "intervalo_confianca" in data
     assert "features_usadas" in data
-    assert data["modelo"] == "random_forest_sintetico_v1"
+    assert data["modelo"] == "xgboost_pnad_real_production_v1"
 
 
 def test_history_endpoint():
@@ -188,7 +188,7 @@ def test_history_endpoint():
     assert "intervalo_confianca" in prediction
     assert "min" in prediction["intervalo_confianca"]
     assert "max" in prediction["intervalo_confianca"]
-    assert prediction["modelo"] == "random_forest_sintetico_v1"
+    assert prediction["modelo"] == "xgboost_pnad_real_production_v1"
     assert "created_at" in prediction
 
 
