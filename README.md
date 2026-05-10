@@ -104,6 +104,7 @@ Construir uma aplicação capaz de receber dados como idade, sexo, cor/raça, an
 
 ## Melhorias recentes
 
+- v2.7 — Centralização de constantes em core/config.py e redução de duplicação entre API, frontend e testes.
 - v2.6 — Endpoint /metadata para integração, frontend consumindo metadados da API e testes de fallback.
 - v2.5 — Observabilidade básica com /metrics, health check informativo e métricas do modelo em produção.
 - v2.4 — Validação robusta do input do /predict, documentação OpenAPI enriquecida e testes para payloads inválidos.
@@ -345,6 +346,12 @@ Se houver falha ao acessar o banco durante a contagem de predições, `/metrics`
 O endpoint `GET /metadata` expõe os limites numéricos aceitos pelo `POST /predict` (`idade` de 14 a 100 e `anos_estudo` de 0 a 20), além das opções categóricas aceitas para `sexo`, `cor_raca`, `setor` e `regiao`.
 
 O frontend Streamlit consome `/metadata` para configurar os controles de idade, anos de estudo e categorias. Se `/metadata` falhar, o app mantém fallback local com os mesmos limites e categorias, evitando que a interface deixe de funcionar.
+
+## Configuração centralizada
+
+As principais constantes da aplicação ficam centralizadas em `core/config.py`, incluindo `APP_NAME`, `APP_VERSION`, limites numéricos e opções categóricas usadas pelo `POST /predict`.
+
+Essas constantes são reutilizadas pelo backend, pelo frontend e pelos testes, reduzindo duplicação entre `/features`, `/metadata`, `/health`, `/metrics`, schemas Pydantic e fallback local do Streamlit. A mudança não altera o comportamento da API; apenas torna limites e categorias mais fáceis de manter.
 
 ## Contratos da API
 
