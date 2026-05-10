@@ -170,12 +170,45 @@ def test_predict_valid_input():
     assert "intervalo_confianca" in data
     assert "features_usadas" in data
     assert data["modelo"] == "xgboost_pnad_real_production_v1"
+    assert isinstance(data["rendimento_hora_previsto"], (int, float))
+    assert data["features_usadas"] == payload
 
     intervalo = data["intervalo_confianca"]
 
     assert "min" in intervalo
     assert "max" in intervalo
+    assert isinstance(intervalo["min"], (int, float))
+    assert isinstance(intervalo["max"], (int, float))
     assert intervalo["min"] <= data["rendimento_hora_previsto"] <= intervalo["max"]
+
+
+def test_predict_openapi_response_model_contract():
+    response = client.get("/openapi.json")
+
+    assert response.status_code == 200
+
+    schema = response.json()
+    predict_schema = schema["paths"]["/predict"]["post"]["responses"]["200"][
+        "content"
+    ]["application/json"]["schema"]
+
+    assert predict_schema == {"$ref": "#/components/schemas/PredictionOutput"}
+
+    prediction_output = schema["components"]["schemas"]["PredictionOutput"]
+    assert set(prediction_output["required"]) == {
+        "rendimento_hora_previsto",
+        "intervalo_confianca",
+        "features_usadas",
+        "modelo",
+    }
+    assert prediction_output["properties"]["rendimento_hora_previsto"]["type"] == "number"
+    assert prediction_output["properties"]["intervalo_confianca"] == {
+        "$ref": "#/components/schemas/PredictionInterval"
+    }
+    assert prediction_output["properties"]["features_usadas"] == {
+        "$ref": "#/components/schemas/PredictionFeatures"
+    }
+    assert prediction_output["properties"]["modelo"]["type"] == "string"
 
 
 def test_predict_rate_limit_returns_429(monkeypatch):

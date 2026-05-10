@@ -23,8 +23,22 @@ class PredictionInput(BaseModel):
     }
 
 
+class PredictionInterval(BaseModel):
+    min: float
+    max: float
+
+
+class PredictionFeatures(BaseModel):
+    idade: int
+    sexo: str
+    cor_raca: str
+    anos_estudo: int
+    setor: str
+    regiao: str
+
+
 class PredictionOutput(BaseModel):
     rendimento_hora_previsto: float
-    intervalo_confianca: dict
-    features_usadas: dict
+    intervalo_confianca: PredictionInterval
+    features_usadas: PredictionFeatures
     modelo: str
