@@ -1,0 +1,19 @@
+{
+    "model_name": "xgboost_pnad_real_production_v1",
+    "data_source": "pnad_real_processed",
+    "rmse": 5.86,
+    "mae": 4.34,
+    "r2": 0.333,
+    "n_rows": 175132,
+    "features": [
+        "idade",
+        "sexo",
+        "cor_raca",
+        "anos_estudo",
+        "setor",
+        "regiao"
+    ],
+    "target": "rendimento_hora",
+    "promoted_from": "model_comparison",
+    "note": "Modelo treinado com microdados reais da PNAD Contínua 2023 trimestre 1"
+}
