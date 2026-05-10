@@ -3,27 +3,15 @@ import os
 import requests
 import streamlit as st
 
+from frontend.metadata import (
+    fetch_metadata,
+    get_categorical_options,
+    get_numeric_constraint,
+)
+
 
 PRODUCTION_API_URL = "https://rendimento-predictor-api.onrender.com"
 LOCAL_API_URL = "http://localhost:8000"
-FALLBACK_METADATA = {
-    "numeric_constraints": {
-        "idade": {
-            "min": 14,
-            "max": 100,
-        },
-        "anos_estudo": {
-            "min": 0,
-            "max": 20,
-        },
-    },
-    "categorical_options": {
-        "sexo": ["M", "F"],
-        "cor_raca": ["Branca", "Preta", "Parda", "Amarela", "Indigena"],
-        "setor": ["Servicos", "Industria", "Comercio", "Agricultura", "Construcao"],
-        "regiao": ["Norte", "Nordeste", "Centro-Oeste", "Sudeste", "Sul"],
-    },
-}
 
 
 def get_api_url() -> str:
@@ -79,34 +67,7 @@ def load_json(endpoint: str) -> dict:
     return response.json()
 
 
-def load_metadata() -> dict:
-    try:
-        return load_json("/metadata")
-    except requests.exceptions.RequestException:
-        return FALLBACK_METADATA
-
-
-def get_numeric_constraint(metadata: dict, field: str) -> tuple[int, int]:
-    fallback = FALLBACK_METADATA["numeric_constraints"][field]
-    constraints = metadata.get("numeric_constraints", {}).get(field, {})
-
-    return (
-        int(constraints.get("min", fallback["min"])),
-        int(constraints.get("max", fallback["max"])),
-    )
-
-
-def get_categorical_options(metadata: dict, field: str) -> list[str]:
-    fallback = FALLBACK_METADATA["categorical_options"][field]
-    options = metadata.get("categorical_options", {}).get(field)
-
-    if not options:
-        return fallback
-
-    return list(options)
-
-
-METADATA = load_metadata()
+METADATA = fetch_metadata(API_URL)
 IDADE_MIN, IDADE_MAX = get_numeric_constraint(METADATA, "idade")
 ANOS_ESTUDO_MIN, ANOS_ESTUDO_MAX = get_numeric_constraint(METADATA, "anos_estudo")
 SEXO_OPTIONS = get_categorical_options(METADATA, "sexo")
