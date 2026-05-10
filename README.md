@@ -104,6 +104,7 @@ Construir uma aplicação capaz de receber dados como idade, sexo, cor/raça, an
 
 ## Melhorias recentes
 
+- v2.6 — Endpoint /metadata para integração, frontend consumindo metadados da API e testes de fallback.
 - v2.5 — Observabilidade básica com /metrics, health check informativo e métricas do modelo em produção.
 - v2.4 — Validação robusta do input do /predict, documentação OpenAPI enriquecida e testes para payloads inválidos.
 - v2.3 — Contratos explícitos da API com Pydantic, documentação OpenAPI mais precisa e testes de contrato.
@@ -143,6 +144,14 @@ GET /metrics
 ```
 
 Retorna métricas básicas de observabilidade da API, incluindo nome da aplicação, status, modelo em produção, total de predições salvas no histórico e métricas do modelo de produção (`model_rmse`, `model_mae` e `model_r2`).
+
+### Metadados da API
+
+```http
+GET /metadata
+```
+
+Retorna metadados para integração com clientes externos e frontend, incluindo `app_name`, `version`, `model_name`, `prediction_endpoint`, `numeric_constraints` e `categorical_options`.
 
 ### Features
 
@@ -331,9 +340,15 @@ O endpoint `GET /metrics` expõe `app_name`, `status`, `model_name`, `total_pred
 
 Se houver falha ao acessar o banco durante a contagem de predições, `/metrics` responde de forma controlada com `status` igual a `degraded`, `total_predictions` igual a `0` e rollback da transação.
 
+## Integração com clientes
+
+O endpoint `GET /metadata` expõe os limites numéricos aceitos pelo `POST /predict` (`idade` de 14 a 100 e `anos_estudo` de 0 a 20), além das opções categóricas aceitas para `sexo`, `cor_raca`, `setor` e `regiao`.
+
+O frontend Streamlit consome `/metadata` para configurar os controles de idade, anos de estudo e categorias. Se `/metadata` falhar, o app mantém fallback local com os mesmos limites e categorias, evitando que a interface deixe de funcionar.
+
 ## Contratos da API
 
-A API possui contratos de resposta explícitos com Pydantic para os principais endpoints. O `POST /predict` usa `PredictionOutput`, com `intervalo_confianca` e `features_usadas` tipados. Os endpoints `/health`, `/metrics`, `/model-info`, `/model-info/real`, `/model-info/production`, `/model-comparison` e `/history` também possuem `response_model` dedicado.
+A API possui contratos de resposta explícitos com Pydantic para os principais endpoints. O `POST /predict` usa `PredictionOutput`, com `intervalo_confianca` e `features_usadas` tipados. Os endpoints `/health`, `/metrics`, `/metadata`, `/model-info`, `/model-info/real`, `/model-info/production`, `/model-comparison` e `/history` também possuem `response_model` dedicado.
 
 O input do `POST /predict` também possui validação explícita via `PredictionInput`: `idade` aceita valores de 14 a 100, `anos_estudo` aceita valores de 0 a 20, e campos categóricos como `sexo`, `cor_raca`, `setor` e `regiao` aceitam apenas categorias suportadas pelo modelo e pelo frontend. Entradas inválidas, campos obrigatórios ausentes, tipos incorretos, categorias inválidas e limites numéricos fora da faixa são rejeitados com HTTP 422.
 
@@ -679,6 +694,8 @@ Por padrão, o frontend local usa a API em:
 ```txt
 http://localhost:8000
 ```
+
+O formulário de predição usa `GET /metadata` para carregar limites e opções aceitos pela API. Caso esse endpoint não esteja disponível, o frontend usa fallback local com os mesmos valores esperados pelo backend.
 
 Em produção, configure a URL da API por variável de ambiente ou secret do Streamlit Cloud:
 
