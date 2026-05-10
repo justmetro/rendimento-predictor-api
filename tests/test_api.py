@@ -271,6 +271,28 @@ def test_features_endpoint_is_listed_in_openapi():
     assert "get" in schema["paths"]["/features"]
 
 
+def test_features_and_metadata_are_consistent():
+    features_response = client.get("/features")
+    metadata_response = client.get("/metadata")
+
+    assert features_response.status_code == 200
+    assert metadata_response.status_code == 200
+
+    features = features_response.json()["features"]
+    metadata = metadata_response.json()
+    numeric_constraints = metadata["numeric_constraints"]
+    categorical_options = metadata["categorical_options"]
+
+    assert features["idade"]["min"] == numeric_constraints["idade"]["min"]
+    assert features["idade"]["max"] == numeric_constraints["idade"]["max"]
+    assert features["anos_estudo"]["min"] == numeric_constraints["anos_estudo"]["min"]
+    assert features["anos_estudo"]["max"] == numeric_constraints["anos_estudo"]["max"]
+    assert features["sexo"]["values"] == categorical_options["sexo"]
+    assert features["cor_raca"]["values"] == categorical_options["cor_raca"]
+    assert features["setor"]["values"] == categorical_options["setor"]
+    assert features["regiao"]["values"] == categorical_options["regiao"]
+
+
 def test_model_info_endpoint():
     response = client.get("/model-info")
 
