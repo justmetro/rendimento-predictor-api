@@ -271,6 +271,43 @@ def test_predict_openapi_response_model_contract():
     assert prediction_output["properties"]["modelo"]["type"] == "string"
 
 
+def test_predict_openapi_input_validation_contract():
+    response = client.get("/openapi.json")
+
+    assert response.status_code == 200
+
+    schema = response.json()
+    prediction_input = schema["components"]["schemas"]["PredictionInput"]
+    properties = prediction_input["properties"]
+
+    assert properties["idade"]["minimum"] == 14
+    assert properties["idade"]["maximum"] == 100
+    assert properties["anos_estudo"]["minimum"] == 0
+    assert properties["anos_estudo"]["maximum"] == 20
+    assert properties["sexo"]["enum"] == ["M", "F"]
+    assert properties["cor_raca"]["enum"] == [
+        "Branca",
+        "Preta",
+        "Parda",
+        "Amarela",
+        "Indigena",
+    ]
+    assert properties["setor"]["enum"] == [
+        "Servicos",
+        "Industria",
+        "Comercio",
+        "Agricultura",
+        "Construcao",
+    ]
+    assert properties["regiao"]["enum"] == [
+        "Norte",
+        "Nordeste",
+        "Centro-Oeste",
+        "Sudeste",
+        "Sul",
+    ]
+
+
 def test_predict_rate_limit_returns_429(monkeypatch):
     rate_limit.clear_rate_limit_state()
     monkeypatch.setattr(rate_limit, "PREDICT_RATE_LIMIT", 1)
@@ -470,6 +507,36 @@ def test_predict_invalid_age():
     assert response.status_code == 422
 
 
+def test_predict_age_above_max_returns_422():
+    payload = {
+        "idade": 101,
+        "sexo": "M",
+        "cor_raca": "Branca",
+        "anos_estudo": 12,
+        "setor": "Servicos",
+        "regiao": "Sudeste"
+    }
+
+    response = client.post("/predict", json=payload)
+
+    assert response.status_code == 422
+
+
+def test_predict_invalid_years_of_study_returns_422():
+    payload = {
+        "idade": 35,
+        "sexo": "M",
+        "cor_raca": "Branca",
+        "anos_estudo": 21,
+        "setor": "Servicos",
+        "regiao": "Sudeste"
+    }
+
+    response = client.post("/predict", json=payload)
+
+    assert response.status_code == 422
+
+
 def test_predict_invalid_sex():
     payload = {
         "idade": 35,
@@ -478,6 +545,21 @@ def test_predict_invalid_sex():
         "anos_estudo": 12,
         "setor": "Servicos",
         "regiao": "Sudeste"
+    }
+
+    response = client.post("/predict", json=payload)
+
+    assert response.status_code == 422
+
+
+def test_predict_invalid_region_returns_422():
+    payload = {
+        "idade": 35,
+        "sexo": "M",
+        "cor_raca": "Branca",
+        "anos_estudo": 12,
+        "setor": "Servicos",
+        "regiao": "Exterior"
     }
 
     response = client.post("/predict", json=payload)

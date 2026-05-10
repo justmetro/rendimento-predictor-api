@@ -1,13 +1,15 @@
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict, Field
 
 
 class PredictionInput(BaseModel):
-    idade: int = Field(..., ge=18, le=80)
-    sexo: str = Field(..., pattern="^[MF]$")
-    cor_raca: str
+    idade: int = Field(..., ge=14, le=100)
+    sexo: Literal["M", "F"]
+    cor_raca: Literal["Branca", "Preta", "Parda", "Amarela", "Indigena"]
     anos_estudo: int = Field(..., ge=0, le=20)
-    setor: str
-    regiao: str
+    setor: Literal["Servicos", "Industria", "Comercio", "Agricultura", "Construcao"]
+    regiao: Literal["Norte", "Nordeste", "Centro-Oeste", "Sudeste", "Sul"]
 
     model_config = {
         "json_schema_extra": {
