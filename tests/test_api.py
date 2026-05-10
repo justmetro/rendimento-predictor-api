@@ -37,6 +37,79 @@ def test_health_endpoint():
     assert response.json()["database_connected"] is True
 
 
+def test_metrics_endpoint():
+    response = client.get("/metrics")
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["app_name"] == "Rendimento Predictor API"
+    assert data["status"] == "ok"
+    assert data["model_name"] == "xgboost_pnad_real_production_v1"
+    assert isinstance(data["total_predictions"], int)
+
+
+def test_metrics_returns_controlled_response_when_database_fails():
+    class FailingQueryDb:
+        rollback_called = False
+
+        def query(self, model):
+            from sqlalchemy.exc import SQLAlchemyError
+
+            raise SQLAlchemyError("query failed")
+
+        def rollback(self):
+            self.rollback_called = True
+
+    fake_db = FailingQueryDb()
+    previous_override = app.dependency_overrides.get(get_db)
+
+    def override_get_db():
+        yield fake_db
+
+    app.dependency_overrides[get_db] = override_get_db
+
+    try:
+        response = client.get("/metrics")
+    finally:
+        if previous_override is None:
+            app.dependency_overrides.pop(get_db, None)
+        else:
+            app.dependency_overrides[get_db] = previous_override
+
+    assert response.status_code == 200
+    assert fake_db.rollback_called is True
+    assert response.json() == {
+        "app_name": "Rendimento Predictor API",
+        "status": "degraded",
+        "model_name": "xgboost_pnad_real_production_v1",
+        "total_predictions": 0,
+    }
+
+
+def test_metrics_openapi_response_model_contract():
+    response = client.get("/openapi.json")
+
+    assert response.status_code == 200
+
+    schema = response.json()
+    metrics_schema = schema["paths"]["/metrics"]["get"]["responses"]["200"]["content"][
+        "application/json"
+    ]["schema"]
+
+    assert metrics_schema == {"$ref": "#/components/schemas/MetricsOutput"}
+
+    metrics_output = schema["components"]["schemas"]["MetricsOutput"]
+    assert set(metrics_output["required"]) == {
+        "app_name",
+        "status",
+        "model_name",
+        "total_predictions",
+    }
+    assert metrics_output["properties"]["total_predictions"]["type"] == "integer"
+
+
 def test_features_endpoint():
     response = client.get("/features")
 

@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 from api.schemas import (
     HistoryOutput,
+    MetricsOutput,
     ModelComparisonOutput,
     ModelInfoOutput,
     PredictionInput,
@@ -51,6 +52,25 @@ def health_check():
         "model_loaded": True,
         "database_connected": check_database_connection(),
         "version": "1.3.0"
+    }
+
+
+@router.get("/metrics", response_model=MetricsOutput)
+def get_metrics(db: Session = Depends(get_db)):
+    status = "ok"
+
+    try:
+        total_predictions = db.query(PredictionRecord).count()
+    except SQLAlchemyError:
+        db.rollback()
+        status = "degraded"
+        total_predictions = 0
+
+    return {
+        "app_name": "Rendimento Predictor API",
+        "status": status,
+        "model_name": MODEL_NAME,
+        "total_predictions": total_predictions,
     }
 
 

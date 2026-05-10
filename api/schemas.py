@@ -93,6 +93,15 @@ class HistoryOutput(BaseModel):
     predictions: list[HistoryPredictionItem]
 
 
+class MetricsOutput(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
+
+    app_name: str
+    status: str
+    model_name: str
+    total_predictions: int
+
+
 class ModelInfoOutput(BaseModel):
     model_config = ConfigDict(protected_namespaces=())
 
