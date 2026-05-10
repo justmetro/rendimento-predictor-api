@@ -46,7 +46,8 @@ def fetch_metadata(api_url: str) -> dict:
 
 def get_numeric_constraint(metadata: dict, field: str) -> tuple[int, int]:
     fallback = FALLBACK_METADATA["numeric_constraints"][field]
-    constraints = metadata.get("numeric_constraints", {}).get(field, {})
+    numeric_constraints = metadata.get("numeric_constraints") or {}
+    constraints = numeric_constraints.get(field) or {}
 
     return (
         int(constraints.get("min", fallback["min"])),
@@ -56,7 +57,8 @@ def get_numeric_constraint(metadata: dict, field: str) -> tuple[int, int]:
 
 def get_categorical_options(metadata: dict, field: str) -> list[str]:
     fallback = FALLBACK_METADATA["categorical_options"][field]
-    options = metadata.get("categorical_options", {}).get(field)
+    categorical_options = metadata.get("categorical_options") or {}
+    options = categorical_options.get(field)
 
     if not options:
         return fallback

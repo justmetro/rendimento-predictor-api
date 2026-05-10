@@ -51,6 +51,60 @@ from ml.predict import (
 router = APIRouter()
 
 
+def get_numeric_constraints() -> dict:
+    return {
+        "idade": {
+            "min": IDADE_MIN,
+            "max": IDADE_MAX,
+        },
+        "anos_estudo": {
+            "min": ANOS_ESTUDO_MIN,
+            "max": ANOS_ESTUDO_MAX,
+        },
+    }
+
+
+def get_categorical_options() -> dict:
+    return {
+        "sexo": SEXO_OPTIONS,
+        "cor_raca": COR_RACA_OPTIONS,
+        "setor": SETOR_OPTIONS,
+        "regiao": REGIAO_OPTIONS,
+    }
+
+
+def get_feature_definitions() -> dict:
+    numeric_constraints = get_numeric_constraints()
+    categorical_options = get_categorical_options()
+
+    return {
+        "idade": {
+            "type": "int",
+            **numeric_constraints["idade"],
+        },
+        "sexo": {
+            "type": "category",
+            "values": categorical_options["sexo"],
+        },
+        "cor_raca": {
+            "type": "category",
+            "values": categorical_options["cor_raca"],
+        },
+        "anos_estudo": {
+            "type": "int",
+            **numeric_constraints["anos_estudo"],
+        },
+        "setor": {
+            "type": "category",
+            "values": categorical_options["setor"],
+        },
+        "regiao": {
+            "type": "category",
+            "values": categorical_options["regiao"],
+        },
+    }
+
+
 @router.get("/")
 def root():
     return {
@@ -102,22 +156,8 @@ def get_metadata():
         "version": APP_VERSION,
         "model_name": MODEL_NAME,
         "prediction_endpoint": "/predict",
-        "numeric_constraints": {
-            "idade": {
-                "min": IDADE_MIN,
-                "max": IDADE_MAX,
-            },
-            "anos_estudo": {
-                "min": ANOS_ESTUDO_MIN,
-                "max": ANOS_ESTUDO_MAX,
-            },
-        },
-        "categorical_options": {
-            "sexo": SEXO_OPTIONS,
-            "cor_raca": COR_RACA_OPTIONS,
-            "setor": SETOR_OPTIONS,
-            "regiao": REGIAO_OPTIONS,
-        },
+        "numeric_constraints": get_numeric_constraints(),
+        "categorical_options": get_categorical_options(),
     }
 
 
@@ -125,34 +165,7 @@ def get_metadata():
 def get_features():
     return {
         "target": "rendimento_hora",
-        "features": {
-            "idade": {
-                "type": "int",
-                "min": IDADE_MIN,
-                "max": IDADE_MAX
-            },
-            "sexo": {
-                "type": "category",
-                "values": SEXO_OPTIONS
-            },
-            "cor_raca": {
-                "type": "category",
-                "values": COR_RACA_OPTIONS
-            },
-            "anos_estudo": {
-                "type": "int",
-                "min": ANOS_ESTUDO_MIN,
-                "max": ANOS_ESTUDO_MAX
-            },
-            "setor": {
-                "type": "category",
-                "values": SETOR_OPTIONS
-            },
-            "regiao": {
-                "type": "category",
-                "values": REGIAO_OPTIONS
-            }
-        }
+        "features": get_feature_definitions(),
     }
 
 

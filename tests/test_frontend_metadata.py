@@ -45,6 +45,14 @@ def test_get_numeric_constraint_uses_fallback_when_numeric_constraints_is_missin
     )
 
 
+def test_get_numeric_constraint_uses_fallback_when_numeric_constraints_is_none():
+    metadata = {
+        "numeric_constraints": None,
+    }
+
+    assert get_numeric_constraint(metadata, "idade") == (IDADE_MIN, IDADE_MAX)
+
+
 def test_get_categorical_options_returns_metadata_values():
     metadata = {
         "categorical_options": {
@@ -65,6 +73,14 @@ def test_get_categorical_options_uses_fallback_when_field_is_missing():
 
 def test_get_categorical_options_uses_fallback_when_categorical_options_is_missing():
     assert get_categorical_options({}, "sexo") == SEXO_OPTIONS
+
+
+def test_get_categorical_options_uses_fallback_when_categorical_options_is_none():
+    metadata = {
+        "categorical_options": None,
+    }
+
+    assert get_categorical_options(metadata, "sexo") == SEXO_OPTIONS
 
 
 def test_get_categorical_options_uses_fallback_when_options_are_empty():
