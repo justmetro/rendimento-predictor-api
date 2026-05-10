@@ -1,6 +1,7 @@
 from fastapi.testclient import TestClient
 
 import api.routes as routes
+import api.rate_limit as rate_limit
 from database.database import get_db
 from ml.predict import PredictionModelError
 from main import app
@@ -175,6 +176,33 @@ def test_predict_valid_input():
     assert "min" in intervalo
     assert "max" in intervalo
     assert intervalo["min"] <= data["rendimento_hora_previsto"] <= intervalo["max"]
+
+
+def test_predict_rate_limit_returns_429(monkeypatch):
+    rate_limit.clear_rate_limit_state()
+    monkeypatch.setattr(rate_limit, "PREDICT_RATE_LIMIT", 1)
+    monkeypatch.setattr(rate_limit, "PREDICT_RATE_WINDOW_SECONDS", 60)
+
+    payload = {
+        "idade": 35,
+        "sexo": "M",
+        "cor_raca": "Branca",
+        "anos_estudo": 12,
+        "setor": "Servicos",
+        "regiao": "Sudeste"
+    }
+
+    try:
+        first_response = client.post("/predict", json=payload)
+        second_response = client.post("/predict", json=payload)
+    finally:
+        rate_limit.clear_rate_limit_state()
+
+    assert first_response.status_code == 200
+    assert second_response.status_code == 429
+    assert second_response.json()["detail"] == (
+        "Limite de requisições excedido. Tente novamente em instantes."
+    )
 
 
 def test_predict_returns_response_when_history_save_fails():

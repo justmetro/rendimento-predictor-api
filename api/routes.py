@@ -3,6 +3,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from api.schemas import PredictionInput, PredictionOutput
+from api.rate_limit import enforce_predict_rate_limit
 from database.database import check_database_connection, get_db
 from database.models import PredictionRecord
 from ml.feature_importance import (
@@ -115,7 +116,11 @@ def get_production_pnad_feature_importance_endpoint():
     return get_production_pnad_feature_importance()
 
 
-@router.post("/predict", response_model=PredictionOutput)
+@router.post(
+    "/predict",
+    response_model=PredictionOutput,
+    dependencies=[Depends(enforce_predict_rate_limit)],
+)
 def predict(data: PredictionInput, db: Session = Depends(get_db)):
     input_data = data.model_dump()
 
