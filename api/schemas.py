@@ -119,10 +119,9 @@ class PredictionOutput(BaseModel):
 
 class HistoryPredictionItem(BaseModel):
     id: int
-    idade: int
-    sexo: str
-    cor_raca: str
+    faixa_etaria: str
     anos_estudo: int
+    escolaridade: str
     setor: str
     regiao: str
     rendimento_hora_previsto: float

@@ -28,6 +28,7 @@ from api.schemas import (
     RealModelInfoOutput,
 )
 from api.rate_limit import enforce_predict_rate_limit
+from api.security import anonymize_history_response
 from database.database import check_database_connection, get_db
 from database.models import PredictionRecord
 from ml.feature_importance import (
@@ -282,7 +283,9 @@ def get_history(limit: int = 10, db: Session = Depends(get_db)):
         for record in records
     ]
 
-    return {
+    response = {
         "total_returned": len(predictions),
         "predictions": predictions,
     }
+
+    return anonymize_history_response(response)

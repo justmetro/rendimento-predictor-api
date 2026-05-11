@@ -676,7 +676,7 @@ def test_predict_returns_friendly_error_when_model_prediction_fails(monkeypatch)
     assert response.json()["detail"] == "Erro interno ao gerar predição."
 
 
-def test_history_endpoint():
+def test_history_endpoint_is_public_and_anonymized():
     payload = {
         "idade": 35,
         "sexo": "M",
@@ -704,10 +704,12 @@ def test_history_endpoint():
     prediction = data["predictions"][0]
 
     assert "id" in prediction
-    assert prediction["idade"] == payload["idade"]
-    assert prediction["sexo"] == payload["sexo"]
-    assert prediction["cor_raca"] == payload["cor_raca"]
+    assert "idade" not in prediction
+    assert "sexo" not in prediction
+    assert "cor_raca" not in prediction
+    assert prediction["faixa_etaria"] == "35-44"
     assert prediction["anos_estudo"] == payload["anos_estudo"]
+    assert prediction["escolaridade"] == "Medio completo"
     assert prediction["setor"] == payload["setor"]
     assert prediction["regiao"] == payload["regiao"]
     assert "rendimento_hora_previsto" in prediction
@@ -749,10 +751,9 @@ def test_history_openapi_response_model_contract():
     history_item = schema["components"]["schemas"]["HistoryPredictionItem"]
     assert set(history_item["required"]) == {
         "id",
-        "idade",
-        "sexo",
-        "cor_raca",
+        "faixa_etaria",
         "anos_estudo",
+        "escolaridade",
         "setor",
         "regiao",
         "rendimento_hora_previsto",
