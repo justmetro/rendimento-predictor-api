@@ -165,9 +165,9 @@ st.write(
     Aplicação simples para consumir a API de predição de rendimento por hora.
 
     O projeto combina Machine Learning, FastAPI, Streamlit, testes automatizados,
-    CI/CD e deploy. O modelo atual em produção ainda é um baseline treinado com
-    dados sintéticos, enquanto o pipeline de dados reais já está sendo preparado
-    separadamente.
+    CI/CD e deploy. Modelo em produção: XGBoost treinado com microdados reais da
+    PNAD Contínua 2023 T1. As predições são estimativas aproximadas e o intervalo
+    usa percentis 5-95 dos resíduos.
     """
 )
 
@@ -189,9 +189,10 @@ with st.sidebar:
     st.markdown("- `/predict`")
     st.markdown("- `/history`")
 
-    st.warning(
-        "O modelo em produção ainda usa dados sintéticos. "
-        "O pipeline de dados reais está em desenvolvimento."
+    st.info(
+        "Modelo em produção: XGBoost treinado com microdados reais da PNAD "
+        "Contínua 2023 T1. As predições são estimativas aproximadas e o "
+        "intervalo usa percentis 5-95 dos resíduos."
     )
 
 

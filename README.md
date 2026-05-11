@@ -113,6 +113,7 @@ A release `v3.0` conta com 73 testes automatizados cobrindo API, contratos OpenA
 ## Documentação adicional
 
 - [docs/API.md](docs/API.md): endpoints, contratos e exemplos
+- [docs/EXAMPLES.md](docs/EXAMPLES.md): exemplos simples em cURL, Python e JavaScript
 - [docs/MODEL.md](docs/MODEL.md): dados, parser, treinamento, métricas e modelo
 - [docs/CHANGELOG.md](docs/CHANGELOG.md): histórico de versões
 - [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md): desenvolvimento, testes, Docker, CI/CD e manutenção

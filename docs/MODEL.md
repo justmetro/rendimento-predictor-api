@@ -60,6 +60,16 @@ Método de intervalo: residual_percentile_5_95
 
 Esse é o modelo carregado pelo endpoint `POST /predict`.
 
+## Limitações do modelo
+
+O R² de 0.333 indica que o modelo explica uma parte relevante, mas limitada, da variância observada no rendimento por hora.
+
+As predições devem ser interpretadas como estimativas aproximadas, úteis para análise exploratória e demonstração técnica, não como valores determinísticos para casos individuais.
+
+O modelo usa 6 variáveis principais: idade, sexo, cor/raça, anos de estudo, setor e região. Ele não captura todos os fatores reais que podem influenciar rendimento, como ocupação detalhada, experiência profissional, informalidade, jornada, localização mais granular e condições específicas do mercado de trabalho.
+
+Os dados vêm da PNAD Contínua 2023 T1. Mudanças temporais, econômicas ou estruturais posteriores a esse período não estão modeladas diretamente.
+
 ## Intervalo de predição
 
 O campo `intervalo_confianca` mantém o formato da API e é estimado com os percentis 5 e 95 dos resíduos observados no conjunto de teste do modelo de produção.
